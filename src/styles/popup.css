@@ -12,6 +12,14 @@ html, body {
   background: transparent;
   width: 450px;
   height: 650px;
+  overflow: hidden;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+}
+
+html::-webkit-scrollbar,
+body::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
 }
 
 #root {
@@ -20,6 +28,13 @@ html, body {
   width: 450px;
   height: 650px;
   background: transparent;
+  overflow: hidden;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+}
+
+#root::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
 }
 
 /* Base styles */

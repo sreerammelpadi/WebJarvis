@@ -55,9 +55,9 @@ const InlineChatWindow: React.FC<{
   };
 
   return (
-    <div className="flex h-full w-full flex-col">
+    <div className="flex h-full w-full flex-col bg-white dark:bg-gray-900">
       {/* Messages Area */}
-      <div className="flex-1 overflow-y-auto px-6 py-6 space-y-6 scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 scrollbar-track-transparent">
+      <div className="flex-1 overflow-y-auto px-6 py-6 space-y-6 scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 scrollbar-track-transparent bg-white dark:bg-gray-900 min-h-0">
         {messages.length === 0 ? (
           <div className="flex h-full items-center justify-center">
             <div className="text-center space-y-6 max-w-sm">
@@ -98,7 +98,7 @@ const InlineChatWindow: React.FC<{
       </div>
 
       {/* Input Area */}
-      <div className="px-6 py-4 border-t border-gray-200 dark:border-gray-700">
+      <div className="px-6 py-4 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
         <div className="flex gap-4 items-end">
           <div className="flex-1 relative">
             <div className={`absolute inset-0 bg-gradient-to-r from-blue-500/6 to-purple-500/6 rounded-3xl transition-all duration-300 ${inputFocused ? 'opacity-90 scale-102' : 'opacity-0 scale-100'}`}></div>
@@ -185,7 +185,7 @@ const Popup: React.FC = () => {
   }
 
   return (
-    <div className="w-[450px] h-[650px] bg-white dark:bg-gray-900 flex flex-col">
+    <div className="w-[450px] h-[650px] bg-white dark:bg-gray-900 flex flex-col overflow-hidden fixed inset-0">
       {/* Header */}
       <header className="px-6 py-5 bg-gradient-to-r from-blue-600 via-purple-600 to-cyan-600 text-white">
         <div className="flex items-center justify-between">
@@ -216,7 +216,7 @@ const Popup: React.FC = () => {
       </header>
 
       {/* Main Content */}
-      <main className="flex-1 flex min-h-0">
+      <main className="flex-1 flex min-h-0 overflow-hidden">
         <div className={`transform transition-all duration-300 ease-in-out ${showSidebar ? 'translate-x-0 opacity-100' : '-translate-x-full opacity-0 w-0'}`}>
           {showSidebar && (<LeftNav currentPage={state.currentPage} onQuickAction={sendMessage} isProcessing={isProcessing} />)}
         </div>
