@@ -1,0 +1,85 @@
+{
+  "name": "webcopilot",
+  "version": "1.0.0",
+  "description": "AI copilot for any webpage with professional chat UI and intelligent page analysis",
+  "main": "dist/background.js",
+  "scripts": {
+    "build": "webpack --mode production",
+    "build:dev": "webpack --mode development --watch",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:e2e": "playwright test",
+    "lint": "eslint src --ext .ts,.tsx",
+    "lint:fix": "eslint src --ext .ts,.tsx --fix",
+    "format": "prettier --write src/**/*.{ts,tsx,json}",
+    "type-check": "tsc --noEmit",
+    "clean": "rimraf dist",
+    "dev": "npm run build:dev"
+  },
+  "keywords": [
+    "chrome-extension",
+    "ai",
+    "copilot",
+    "web-assistant",
+    "rag",
+    "embeddings"
+  ],
+  "author": "WebCopilot Team",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/chrome": "^0.0.254",
+    "@types/jest": "^29.5.8",
+    "@types/node": "^20.8.10",
+    "@types/react": "^18.2.45",
+    "@types/react-dom": "^18.2.18",
+    "@typescript-eslint/eslint-plugin": "^6.12.0",
+    "@typescript-eslint/parser": "^6.12.0",
+    "autoprefixer": "^10.4.21",
+    "copy-webpack-plugin": "^11.0.0",
+    "css-loader": "^6.8.1",
+    "eslint": "^8.54.0",
+    "eslint-config-prettier": "^9.0.0",
+    "eslint-plugin-react": "^7.33.2",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "html-webpack-plugin": "^5.5.3",
+    "jest": "^29.7.0",
+    "jest-environment-jsdom": "^29.7.0",
+    "playwright": "^1.39.0",
+    "postcss": "^8.4.31",
+    "postcss-loader": "^7.3.3",
+    "prettier": "^3.0.3",
+    "rimraf": "^5.0.5",
+    "style-loader": "^3.3.3",
+    "tailwindcss": "^3.3.5",
+    "ts-jest": "^29.1.1",
+    "ts-loader": "^9.5.0",
+    "typescript": "^5.2.2",
+    "webpack": "^5.89.0",
+    "webpack-cli": "^5.1.4"
+  },
+  "dependencies": {
+    "@mozilla/readability": "^0.5.0",
+    "@supabase/supabase-js": "^2.38.4",
+    "docx": "^8.5.0",
+    "idb": "^7.1.1",
+    "jspdf": "^2.5.1",
+    "mammoth": "^1.6.0",
+    "openai": "^4.20.1",
+    "pdfjs-dist": "^3.11.174",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-markdown": "^9.0.1",
+    "react-syntax-highlighter": "^15.5.0",
+    "uuid": "^9.0.1"
+  },
+  "jest": {
+    "preset": "ts-jest",
+    "testEnvironment": "jsdom",
+    "setupFilesAfterEnv": [
+      "<rootDir>/src/tests/setup.ts"
+    ],
+    "moduleNameMapping": {
+      "^@/(.*)$": "<rootDir>/src/$1"
+    }
+  }
+}
