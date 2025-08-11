@@ -53,10 +53,14 @@ module.exports = {
         '88': '22rem',
         '128': '32rem'
       },
+      // animation: {
+      //   'fade-in': 'fadeIn 0.3s ease-in-out',
+      //   'slide-up': 'slideUp 0.3s ease-out',
+      //   'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite'
+      // },
       animation: {
-        'fade-in': 'fadeIn 0.3s ease-in-out',
-        'slide-up': 'slideUp 0.3s ease-out',
-        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite'
+        'pulse-soft': 'pulse-soft 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+        'gradient-shift': 'gradientShift 3s ease infinite',
       },
       keyframes: {
         fadeIn: {

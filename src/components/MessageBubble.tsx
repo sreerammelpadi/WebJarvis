@@ -22,86 +22,120 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
       if (line.startsWith('```') && line.endsWith('```')) {
         const code = line.slice(3, -3);
         return (
-          <pre key={index} className="bg-gray-100 dark:bg-gray-800 p-3 rounded-lg text-sm font-mono overflow-x-auto shadow-inner">
+          <pre key={index} className="bg-gray-100/80 dark:bg-gray-800/80 p-4 rounded-2xl text-sm font-mono overflow-x-auto shadow-inner mt-3 border border-gray-200/50 dark:border-gray-700/50 backdrop-blur-sm">
             {code}
           </pre>
         );
       } else if (line.startsWith('- ')) {
         return (
-          <div key={index} className="flex items-start">
-            <span className="text-gray-400 mr-2">•</span>
-            <span>{line.slice(2)}</span>
+          <div key={index} className="flex items-start mt-2 group">
+            <div className="w-2 h-2 bg-current rounded-full mt-2 mr-3 opacity-60 group-hover:opacity-100 transition-opacity duration-200"></div>
+            <span className="flex-1">{line.slice(2)}</span>
           </div>
         );
       } else if (line.startsWith('**') && line.endsWith('**')) {
         const text = line.slice(2, -2);
         return (
-          <span key={index} className="font-semibold">
+          <div key={index} className="font-semibold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
             {text}
-          </span>
+          </div>
         );
+      } else if (line.trim() === '') {
+        return <br key={index} />;
       } else {
-        return <span key={index}>{line}</span>;
+        return <div key={index} className="leading-relaxed">{line}</div>;
       }
     });
   };
 
   if (isSystem) {
     return (
-      <div className="text-center text-xs text-gray-500 dark:text-gray-400 py-2">
-        {message.content}
+      <div className="flex justify-center py-4 animate-in fade-in-0 duration-500">
+        <div className="px-6 py-3 bg-gradient-to-r from-gray-100/80 to-gray-200/80 dark:from-gray-800/80 dark:to-gray-700/80 rounded-full text-sm text-gray-600 dark:text-gray-300 backdrop-blur-sm border border-gray-200/50 dark:border-gray-700/50 shadow-sm">
+          {message.content}
+        </div>
       </div>
     );
   }
 
   return (
-    <div className={`flex items-start space-x-3 ${isUser ? 'flex-row-reverse space-x-reverse' : ''}`}>
-      <div className={`w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 ${
+    <div className={`flex items-start gap-4 group ${isUser ? 'flex-row-reverse' : ''}`}>
+      {/* Avatar */}
+      <div className={`relative w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 shadow-lg ring-2 ring-white/50 dark:ring-gray-800/50 transition-all duration-300 group-hover:scale-110 ${
         isUser 
-          ? 'bg-primary-500 text-white' 
-          : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300'
+          ? 'bg-gradient-to-tr from-blue-500 via-purple-500 to-pink-500 text-white' 
+          : 'bg-gradient-to-tr from-emerald-400 via-cyan-500 to-blue-500 text-white'
       }`}>
         {isUser ? (
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+          <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+            <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
           </svg>
         ) : (
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+          <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+            <path fillRule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clipRule="evenodd" />
           </svg>
         )}
+        <div className="absolute inset-0 rounded-full bg-white/20 scale-0 group-hover:scale-100 transition-transform duration-300"></div>
       </div>
 
-      <div className={`flex-1 ${isUser ? 'text-right' : ''}`}>
-        <div className={`inline-block px-3 py-2 rounded-2xl shadow-sm ${
+      {/* Message Content */}
+      <div className={`flex-1 max-w-[320px] ${isUser ? 'text-right' : ''}`}>
+        <div className={`relative inline-block px-6 py-4 rounded-3xl shadow-lg backdrop-blur-sm transition-all duration-300 group-hover:shadow-xl ${
           isUser 
-            ? 'bg-primary-600 text-white' 
-            : 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100'
-        } max-w-[80%]`}> 
-          <div className="text-sm whitespace-pre-wrap leading-relaxed">
+            ? 'bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 text-white rounded-br-lg' 
+            : 'bg-white/90 dark:bg-gray-800/90 text-gray-900 dark:text-white border border-gray-200/50 dark:border-gray-700/50 rounded-bl-lg'
+        } max-w-full relative overflow-hidden`}>
+          
+          {/* Subtle animation overlay */}
+          <div className={`absolute inset-0 rounded-3xl transition-opacity duration-300 ${
+            isUser 
+              ? 'bg-gradient-to-br from-white/10 to-transparent opacity-0 group-hover:opacity-100' 
+              : 'bg-gradient-to-br from-blue-500/5 to-purple-500/5 opacity-0 group-hover:opacity-100'
+          }`}></div>
+          
+          <div className="relative text-sm leading-relaxed">
             {renderContent(message.content)}
           </div>
+          
+          {/* Message tail */}
+          <div className={`absolute -bottom-0 ${
+            isUser 
+              ? '-right-0 w-4 h-4 bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 transform rotate-45 translate-x-2 translate-y-2' 
+              : '-left-0 w-4 h-4 bg-white/90 dark:bg-gray-800/90 border-l border-b border-gray-200/50 dark:border-gray-700/50 transform rotate-45 -translate-x-2 translate-y-2'
+          }`}></div>
         </div>
         
-        <div className={`text-xs text-gray-500 dark:text-gray-400 mt-1 ${
-          isUser ? 'text-right' : 'text-left'
+        {/* Timestamp and metadata */}
+        <div className={`flex items-center gap-2 mt-2 text-xs text-gray-500 dark:text-gray-400 ${
+          isUser ? 'justify-end' : 'justify-start'
         }`}>
-          {formatTimestamp(message.timestamp)}
+          <span className="bg-white/60 dark:bg-gray-800/60 px-2 py-1 rounded-full backdrop-blur-sm">
+            {formatTimestamp(message.timestamp)}
+          </span>
           {message.metadata?.cost !== undefined && (
-            <span className="ml-2">Cost: ${message.metadata.cost.toFixed(4)}</span>
+            <span className="bg-green-100/60 dark:bg-green-900/60 text-green-600 dark:text-green-400 px-2 py-1 rounded-full backdrop-blur-sm">
+              ${message.metadata.cost.toFixed(4)}
+            </span>
           )}
         </div>
 
+        {/* Context information */}
         {message.context?.selection && (
-          <div className={`mt-2 text-xs text-gray-500 dark:text-gray-400 ${
-            isUser ? 'text-right' : 'text-left'
-          }`}>
-            <span className="bg-gray-200 dark:bg-gray-600 px-2 py-1 rounded">
-              Selected: "{message.context.selection.substring(0, 80)}..."
-            </span>
+          <div className={`mt-3 ${isUser ? 'text-right' : 'text-left'}`}>
+            <div className="inline-block max-w-[280px] p-3 bg-gray-100/80 dark:bg-gray-700/80 rounded-2xl text-xs text-gray-600 dark:text-gray-300 backdrop-blur-sm border border-gray-200/50 dark:border-gray-600/50">
+              <div className="flex items-center gap-2 mb-1">
+                <svg className="w-3 h-3 opacity-60" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clipRule="evenodd" />
+                </svg>
+                <span className="font-medium">Selected text:</span>
+              </div>
+              <div className="italic opacity-80">
+                "{message.context.selection.substring(0, 100)}..."
+              </div>
+            </div>
           </div>
         )}
       </div>
     </div>
   );
-}; 
+};
