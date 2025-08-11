@@ -19,7 +19,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
   const renderContent = (content: string) => {
     const lines = content.split('\n');
     return lines.map((line, index) => {
-      if (line.startsWith('```') && line.endsWith('```')) {
+      if (line.startsWith('``````')) {
         const code = line.slice(3, -3);
         return (
           <pre key={index} className="bg-gray-100/80 dark:bg-gray-800/80 p-4 rounded-2xl text-sm font-mono overflow-x-auto shadow-inner mt-3 border border-gray-200/50 dark:border-gray-700/50 backdrop-blur-sm">
@@ -36,7 +36,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
       } else if (line.startsWith('**') && line.endsWith('**')) {
         const text = line.slice(2, -2);
         return (
-          <div key={index} className="font-semibold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+          <div key={index} className="font-semibold bg-gradient-to-r from-[#da7756] to-[#bd5d3a] bg-clip-text text-transparent">
             {text}
           </div>
         );
@@ -63,8 +63,8 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
       {/* Avatar */}
       <div className={`relative w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 shadow-lg ring-2 ring-white/50 dark:ring-gray-800/50 transition-all duration-300 group-hover:scale-110 ${
         isUser 
-          ? 'bg-gradient-to-tr from-blue-500 via-purple-500 to-pink-500 text-white' 
-          : 'bg-gradient-to-tr from-emerald-400 via-cyan-500 to-blue-500 text-white'
+          ? 'bg-gradient-to-tr from-[#da7756] via-[#bd5d3a] to-[#a8462a] text-white' 
+          : 'bg-gradient-to-tr from-[#8a8470] via-[#6b6651] to-[#3d3929] text-white'
       }`}>
         {isUser ? (
           <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
@@ -82,7 +82,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
       <div className={`flex-1 max-w-[320px] ${isUser ? 'text-right' : ''}`}>
         <div className={`relative inline-block px-6 py-4 rounded-3xl shadow-lg backdrop-blur-sm transition-all duration-300 group-hover:shadow-xl ${
           isUser 
-            ? 'bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 text-white rounded-br-lg' 
+            ? 'bg-gradient-to-br from-[#da7756] via-[#bd5d3a] to-[#a8462a] text-white rounded-br-lg' 
             : 'bg-white/90 dark:bg-gray-800/90 text-gray-900 dark:text-white border border-gray-200/50 dark:border-gray-700/50 rounded-bl-lg'
         } max-w-full relative overflow-hidden`}>
           
@@ -90,7 +90,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
           <div className={`absolute inset-0 rounded-3xl transition-opacity duration-300 ${
             isUser 
               ? 'bg-gradient-to-br from-white/10 to-transparent opacity-0 group-hover:opacity-100' 
-              : 'bg-gradient-to-br from-blue-500/5 to-purple-500/5 opacity-0 group-hover:opacity-100'
+              : 'bg-gradient-to-br from-[#da7756]/5 to-[#bd5d3a]/5 opacity-0 group-hover:opacity-100'
           }`}></div>
           
           <div className="relative text-sm leading-relaxed">
@@ -100,7 +100,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
           {/* Message tail */}
           <div className={`absolute -bottom-0 ${
             isUser 
-              ? '-right-0 w-4 h-4 bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 transform rotate-45 translate-x-2 translate-y-2' 
+              ? '-right-0 w-4 h-4 bg-gradient-to-br from-[#da7756] via-[#bd5d3a] to-[#a8462a] transform rotate-45 translate-x-2 translate-y-2' 
               : '-left-0 w-4 h-4 bg-white/90 dark:bg-gray-800/90 border-l border-b border-gray-200/50 dark:border-gray-700/50 transform rotate-45 -translate-x-2 translate-y-2'
           }`}></div>
         </div>
@@ -113,7 +113,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
             {formatTimestamp(message.timestamp)}
           </span>
           {message.metadata?.cost !== undefined && (
-            <span className="bg-green-100/60 dark:bg-green-900/60 text-green-600 dark:text-green-400 px-2 py-1 rounded-full backdrop-blur-sm">
+            <span className="bg-[#da7756]/10 dark:bg-[#da7756]/20 text-[#bd5d3a] dark:text-[#da7756] px-2 py-1 rounded-full backdrop-blur-sm">
               ${message.metadata.cost.toFixed(4)}
             </span>
           )}

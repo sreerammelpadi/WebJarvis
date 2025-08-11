@@ -63,21 +63,21 @@ export const LeftNav: React.FC<LeftNavProps> = ({
       icon: '📄',
       label: 'Summarize Page',
       description: 'Get key points and overview',
-      gradient: 'from-blue-500 to-cyan-500'
+      gradient: 'from-[#da7756] to-[#bd5d3a]'
     },
     {
       id: 'extract-job',
       icon: '💼',
       label: 'Extract Job Details',
       description: 'Parse job requirements',
-      gradient: 'from-purple-500 to-pink-500'
+      gradient: 'from-[#bd5d3a] to-[#a8462a]'
     },
     {
       id: 'cover-letter',
       icon: '✉️',
       label: 'Cover Letter Help',
       description: 'Draft application content',
-      gradient: 'from-emerald-500 to-teal-500'
+      gradient: 'from-[#8a8470] to-[#6b6651]'
     }
   ];
 
@@ -141,7 +141,7 @@ export const LeftNav: React.FC<LeftNavProps> = ({
               onChange={(e) => setMemoryEnabled(e.target.checked)}
               className="sr-only peer"
             />
-            <div className="w-11 h-6 bg-gray-200 dark:bg-gray-700 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-gradient-to-r peer-checked:from-blue-500 peer-checked:to-purple-600"></div>
+            <div className="w-11 h-6 bg-gray-200 dark:bg-gray-700 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-[#da7756]/30 dark:peer-focus:ring-[#da7756]/30 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-gradient-to-r peer-checked:from-[#da7756] peer-checked:to-[#bd5d3a]"></div>
           </label>
         </div>
         <p className="text-xs text-gray-500 dark:text-gray-400">
@@ -183,7 +183,7 @@ export const LeftNav: React.FC<LeftNavProps> = ({
           <div className="space-y-3">
             <div className="p-3 bg-gray-50 dark:bg-gray-800/50 rounded-xl border border-gray-200/50 dark:border-gray-700/50">
               <div className="flex items-start gap-2">
-                <div className="w-2 h-2 bg-green-500 rounded-full mt-2 flex-shrink-0 animate-pulse"></div>
+                <div className="w-2 h-2 bg-[#da7756] rounded-full mt-2 flex-shrink-0 animate-pulse"></div>
                 <div className="min-w-0">
                   <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
                     {currentPage.title}
@@ -212,7 +212,7 @@ export const LeftNav: React.FC<LeftNavProps> = ({
               key={template.id}
               onClick={() => handleTemplateClick(template)}
               disabled={isProcessing}
-              className="w-full text-left px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100/80 dark:hover:bg-gray-700/80 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+              className="w-full text-left px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-[#da7756]/10 dark:hover:bg-[#da7756]/20 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
               title={template.description}
             >
               <div className="font-medium">{template.name}</div>

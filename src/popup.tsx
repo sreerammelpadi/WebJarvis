@@ -62,20 +62,20 @@ const InlineChatWindow: React.FC<{
           <div className="flex h-full items-center justify-center">
             <div className="text-center space-y-6 max-w-sm">
               <div className="relative">
-                <div className="w-20 h-20 mx-auto rounded-full bg-gradient-to-tr from-blue-500 via-purple-500 to-cyan-500 flex items-center justify-center shadow-2xl">
+                <div className="w-20 h-20 mx-auto rounded-full bg-gradient-to-tr from-[#da7756] via-[#f8ece7] to-[#f2d4c7] flex items-center justify-center shadow-2xl">
                   <svg className="w-10 h-10 text-white" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clipRule="evenodd" />
                   </svg>
                 </div>
               </div>
               <div className="space-y-3">
-                <h3 className="text-2xl font-bold text-gray-900 dark:text-white bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Ready to help!</h3>
+                <h3 className="text-2xl font-bold text-gray-900 dark:text-white bg-gradient-to-r from-[#da7756] to-[#bd5d3a] bg-clip-text text-transparent">Ready to help!</h3>
                 <p className="text-base text-gray-600 dark:text-gray-300 leading-relaxed">Ask me anything about this page or explore quick actions to get started.</p>
               </div>
               {currentPage?.title && (
                 <div className="mt-6 p-4 bg-gray-50 dark:bg-gray-800 rounded-xl">
                   <div className="flex items-center gap-3">
-                    <div className="w-3 h-3 bg-green-400 rounded-full"></div>
+                    <div className="w-3 h-3 bg-[#da7756] rounded-full"></div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">{currentPage.title}</p>
                       {currentPage.company && (<p className="text-xs text-gray-600 dark:text-gray-400 mt-1">{currentPage.company}</p>)}
@@ -101,7 +101,7 @@ const InlineChatWindow: React.FC<{
       <div className="px-6 py-4 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
         <div className="flex gap-4 items-end">
           <div className="flex-1 relative">
-            <div className={`absolute inset-0 bg-gradient-to-r from-blue-500/6 to-purple-500/6 rounded-3xl transition-all duration-300 ${inputFocused ? 'opacity-90 scale-102' : 'opacity-0 scale-100'}`}></div>
+            <div className={`absolute inset-0 bg-gradient-to-r from-[#da7756]/6 to-[#bd5d3a]/6 rounded-3xl transition-all duration-300 ${inputFocused ? 'opacity-90 scale-102' : 'opacity-0 scale-100'}`}></div>
             <textarea
               ref={inputRef}
               value={inputValue}
@@ -110,7 +110,7 @@ const InlineChatWindow: React.FC<{
               onFocus={() => setInputFocused(true)}
               onBlur={() => setInputFocused(false)}
               placeholder="Ask me anything about this page..."
-              className={`relative w-full min-h-[52px] max-h-[120px] px-6 py-4 pr-14 bg-gray-50 dark:bg-gray-800 rounded-3xl resize-none focus:outline-none text-base text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 transition-all duration-150 ${inputFocused ? 'ring-2 ring-blue-400/40' : 'ring-0 hover:ring-1 hover:ring-gray-200/40'}`}
+              className={`relative w-full min-h-[52px] max-h-[120px] px-6 py-4 pr-14 bg-gray-50 dark:bg-gray-800 rounded-3xl resize-none focus:outline-none text-base text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 transition-all duration-150 ${inputFocused ? 'ring-2 ring-[#da7756]/40' : 'ring-0 hover:ring-1 hover:ring-gray-200/40'}`}
               rows={1}
               disabled={isProcessing}
             />
@@ -120,7 +120,7 @@ const InlineChatWindow: React.FC<{
               </button>
             )}
           </div>
-          <button onClick={handleSend} disabled={!inputValue.trim() || isProcessing} className={`group relative p-4 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 disabled:from-gray-400 disabled:to-gray-500 text-white rounded-full shadow-lg hover:shadow-xl disabled:shadow-sm transition-all duration-150 flex items-center justify-center min-w-[52px] overflow-hidden ${!inputValue.trim() || isProcessing ? 'scale-95 opacity-70' : 'scale-100 opacity-100 hover:scale-105'}`}>
+          <button onClick={handleSend} disabled={!inputValue.trim() || isProcessing} className={`group relative p-4 bg-gradient-to-r from-[#da7756] to-[#bd5d3a] hover:from-[#bd5d3a] hover:to-[#a8462a] disabled:from-gray-400 disabled:to-gray-500 text-white rounded-full shadow-lg hover:shadow-xl disabled:shadow-sm transition-all duration-150 flex items-center justify-center min-w-[52px] overflow-hidden ${!inputValue.trim() || isProcessing ? 'scale-95 opacity-70' : 'scale-100 opacity-100 hover:scale-105'}`}>
             <div className="absolute inset-0 bg-white/10 scale-x-0 group-hover:scale-x-100 transition-transform duration-150 origin-left"></div>
             {isProcessing ? (<div className="relative w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin" />) : (
               <svg className="relative w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>
@@ -172,7 +172,7 @@ const Popup: React.FC = () => {
     return (
       <div className="w-[600px] h-[600px] bg-white dark:bg-gray-900 flex items-center justify-center">
         <div className="text-center space-y-6">
-          <div className="w-16 h-16 mx-auto rounded-full bg-gradient-to-tr from-blue-500 via-purple-500 to-cyan-500 flex items-center justify-center shadow-lg">
+          <div className="w-16 h-16 mx-auto rounded-full bg-gradient-to-tr from-[#da7756] via-[#f8ece7] to-[#f2d4c7] flex items-center justify-center shadow-lg">
             <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clipRule="evenodd" /></svg>
           </div>
           <div className="space-y-2">
@@ -186,8 +186,8 @@ const Popup: React.FC = () => {
 
   return (
     <div className="w-[600px] h-[600px] bg-white dark:bg-gray-900 flex flex-col overflow-hidden fixed inset-0">
-      {/* Header */}
-      <header className="px-6 py-5 bg-gradient-to-r from-blue-600 via-purple-600 to-cyan-600 text-white">
+      {/* Header with More Subtle Colors */}
+      <header className="px-6 py-5 bg-gradient-to-r from-[#c86b4a] via-[#b25a40] to-[#9d4a2e] text-white">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <button onClick={() => setShowSidebar(!showSidebar)} className={`p-2.5 rounded-2xl bg-white/20 hover:bg-white/30 backdrop-blur-sm transition-all duration-300 active:scale-95 ${showSidebar ? 'rotate-180' : ''}`} title={showSidebar ? 'Hide panel' : 'Show panel'}>
