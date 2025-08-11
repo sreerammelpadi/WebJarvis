@@ -170,7 +170,7 @@ const Popup: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="w-[450px] h-[650px] bg-white dark:bg-gray-900 flex items-center justify-center">
+      <div className="w-[600px] h-[600px] bg-white dark:bg-gray-900 flex items-center justify-center">
         <div className="text-center space-y-6">
           <div className="w-16 h-16 mx-auto rounded-full bg-gradient-to-tr from-blue-500 via-purple-500 to-cyan-500 flex items-center justify-center shadow-lg">
             <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clipRule="evenodd" /></svg>
@@ -185,7 +185,7 @@ const Popup: React.FC = () => {
   }
 
   return (
-    <div className="w-[450px] h-[650px] bg-white dark:bg-gray-900 flex flex-col overflow-hidden fixed inset-0">
+    <div className="w-[600px] h-[600px] bg-white dark:bg-gray-900 flex flex-col overflow-hidden fixed inset-0">
       {/* Header */}
       <header className="px-6 py-5 bg-gradient-to-r from-blue-600 via-purple-600 to-cyan-600 text-white">
         <div className="flex items-center justify-between">

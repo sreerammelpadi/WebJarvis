@@ -10,8 +10,8 @@ html, body {
   margin: 0;
   padding: 0;
   background: transparent;
-  width: 450px;
-  height: 650px;
+  width: 600px;
+  height: 600px;
   overflow: hidden;
   scrollbar-width: none; /* Firefox */
   -ms-overflow-style: none; /* IE and Edge */
@@ -25,8 +25,8 @@ body::-webkit-scrollbar {
 #root {
   margin: 0;
   padding: 0;
-  width: 450px;
-  height: 650px;
+  width: 600px;
+  height: 600px;
   background: transparent;
   overflow: hidden;
   scrollbar-width: none; /* Firefox */
@@ -523,11 +523,11 @@ select:focus-visible {
 
 /* Mobile responsive adjustments */
 @media (max-width: 480px) {
-  .w-\[450px\] {
+  .w-\[600px\] {
     width: 100vw !important;
   }
   
-  .h-\[650px\] {
+  .h-\[600px\] {
     height: 100vh !important;
     height: 100dvh !important;
   }
