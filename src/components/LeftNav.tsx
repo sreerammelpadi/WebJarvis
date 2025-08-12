@@ -62,22 +62,19 @@ export const LeftNav: React.FC<LeftNavProps> = ({
       id: 'summarize',
       icon: '📄',
       label: 'Summarize Page',
-      description: 'Get key points and overview',
-      gradient: 'from-[#da7756] to-[#bd5d3a]'
+      description: 'Get key points and overview'
     },
     {
       id: 'extract-job',
       icon: '💼',
       label: 'Extract Job Details',
-      description: 'Parse job requirements',
-      gradient: 'from-[#bd5d3a] to-[#a8462a]'
+      description: 'Parse job requirements'
     },
     {
       id: 'cover-letter',
       icon: '✉️',
       label: 'Cover Letter Help',
-      description: 'Draft application content',
-      gradient: 'from-[#8a8470] to-[#6b6651]'
+      description: 'Draft application content'
     }
   ];
 
@@ -129,102 +126,129 @@ export const LeftNav: React.FC<LeftNavProps> = ({
   };
 
   return (
-    <aside className="w-60 h-full bg-white/40 dark:bg-gray-900/40 backdrop-blur-md border-r border-gray-200/50 dark:border-gray-800/50 flex flex-col">
-      {/* Memory Toggle */}
-      <div className="p-3 border-b border-gray-200/50 dark:border-gray-800/50">
-        <div className="flex items-center justify-between mb-1">
-          <span className="text-sm font-medium text-gray-900 dark:text-gray-100">Memory</span>
-          <label className="relative inline-flex items-center cursor-pointer">
-            <input
-              type="checkbox"
-              checked={memoryEnabled}
-              onChange={(e) => setMemoryEnabled(e.target.checked)}
-              className="sr-only peer"
-            />
-            <div className="w-9 h-5 bg-gray-200 dark:bg-gray-700 peer-focus:outline-none peer-focus:ring-3 peer-focus:ring-[#da7756]/30 dark:peer-focus:ring-[#da7756]/30 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[1px] after:left-[1px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-gradient-to-r peer-checked:from-[#da7756] peer-checked:to-[#bd5d3a]"></div>
-          </label>
+    <aside className="w-60 h-full bg-white/95 dark:bg-gray-900/95 backdrop-blur-lg border-r border-[#d4d0c1]/50 dark:border-[#4a453c]/50 shadow-xl">
+      {/* Single Scrollable Container */}
+      <div className="h-full overflow-y-auto scrollbar-thin scrollbar-thumb-[#da7756]/30 scrollbar-track-transparent p-4 space-y-4">
+        
+        {/* Memory Toggle Section */}
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <span className="text-sm font-semibold text-[#3d3929] dark:text-[#f0eee5]">Memory</span>
+            <label className="relative inline-flex items-center cursor-pointer">
+              <input
+                type="checkbox"
+                checked={memoryEnabled}
+                onChange={(e) => setMemoryEnabled(e.target.checked)}
+                className="sr-only peer"
+              />
+              <div className="w-9 h-5 bg-[#e8e4d5] dark:bg-[#4a453c] peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-[#da7756]/30 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[1px] after:left-[1px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#da7756]"></div>
+            </label>
+          </div>
+          <p className="text-xs text-[#8a8470] dark:text-[#c7c1a8]">
+            {memoryEnabled ? 'Storing context for better responses' : 'Context storage disabled'}
+          </p>
         </div>
-        <p className="text-xs text-gray-500 dark:text-gray-400">
-          {memoryEnabled ? 'Storing context for better responses' : 'Context storage disabled'}
-        </p>
-      </div>
 
-      {/* Quick Actions */}
-      <div className="p-3 border-b border-gray-200/50 dark:border-gray-800/50">
-        <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-2">Quick Actions</h3>
-        <div className="space-y-1.5">
-          {quickActions.map((action) => (
-            <button
-              key={action.id}
-              onClick={() => handleQuickAction(action.id)}
-              disabled={isProcessing}
-              className="w-full group relative overflow-hidden rounded-lg p-2.5 text-left transition-all duration-200 hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
-            >
-              <div className={`absolute inset-0 bg-gradient-to-r ${action.gradient} opacity-0 group-hover:opacity-10 transition-opacity duration-200`}></div>
-              <div className={`absolute inset-0 bg-gradient-to-r ${action.gradient} opacity-0 group-active:opacity-20 transition-opacity duration-75`}></div>
-              <div className="relative flex items-center gap-2.5">
-                <div className={`w-6 h-6 rounded-lg bg-gradient-to-r ${action.gradient} flex items-center justify-center text-sm shadow-sm`}>
-                  {action.icon}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="text-sm font-medium text-gray-900 dark:text-gray-100">{action.label}</div>
-                  <div className="text-xs text-gray-500 dark:text-gray-400 truncate">{action.description}</div>
-                </div>
-              </div>
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Current Page */}
-      {currentPage && (
-        <div className="p-3 border-b border-gray-200/50 dark:border-gray-800/50">
-          <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-2">Current Page</h3>
+        {/* Quick Actions Section */}
+        <div className="space-y-3">
+          <h3 className="text-sm font-semibold text-[#3d3929] dark:text-[#f0eee5] border-b border-[#d4d0c1]/30 dark:border-[#4a453c]/30 pb-1">Quick Actions</h3>
           <div className="space-y-2">
-            <div className="p-2.5 bg-gray-50 dark:bg-gray-800/50 rounded-lg border border-gray-200/50 dark:border-gray-700/50">
-              <div className="flex items-start gap-2">
-                <div className="w-1.5 h-1.5 bg-[#da7756] rounded-full mt-1.5 flex-shrink-0 animate-pulse"></div>
-                <div className="min-w-0">
-                  <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
+            {quickActions.map((action) => (
+              <button
+                key={action.id}
+                onClick={() => handleQuickAction(action.id)}
+                disabled={isProcessing}
+                className="w-full group relative overflow-hidden rounded-xl p-3 text-left transition-all duration-200 bg-[#f5f3ea]/80 dark:bg-[#342f28]/80 hover:bg-[#da7756]/10 dark:hover:bg-[#da7756]/20 hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 border border-[#e8e4d5]/50 dark:border-[#4a453c]/50 hover:border-[#da7756]/30"
+              >
+                <div className="relative flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#da7756] to-[#bd5d3a] flex items-center justify-center text-sm shadow-sm text-white">
+                    {action.icon}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="text-sm font-medium text-[#3d3929] dark:text-[#f0eee5] group-hover:text-[#bd5d3a] dark:group-hover:text-[#da7756] transition-colors">
+                      {action.label}
+                    </div>
+                    <div className="text-xs text-[#8a8470] dark:text-[#c7c1a8] truncate">
+                      {action.description}
+                    </div>
+                  </div>
+                  <svg className="w-4 h-4 text-[#8a8470] dark:text-[#c7c1a8] opacity-0 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
+                  </svg>
+                </div>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Current Page Section */}
+        {/* {currentPage && (
+          <div className="space-y-3">
+            <h3 className="text-sm font-semibold text-[#3d3929] dark:text-[#f0eee5] border-b border-[#d4d0c1]/30 dark:border-[#4a453c]/30 pb-1">Current Page</h3>
+            <div className="p-3 bg-[#f5f3ea]/80 dark:bg-[#342f28]/80 rounded-xl border border-[#e8e4d5]/50 dark:border-[#4a453c]/50">
+              <div className="flex items-start gap-3">
+                <div className="w-3 h-3 bg-[#da7756] rounded-full mt-1 flex-shrink-0 animate-pulse"></div>
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-medium text-[#3d3929] dark:text-[#f0eee5] truncate">
                     {currentPage.title}
                   </p>
                   {currentPage.company && (
-                    <p className="text-xs text-gray-600 dark:text-gray-400 mt-0.5">
+                    <p className="text-xs text-[#6b6651] dark:text-[#c7c1a8] mt-1">
                       {currentPage.company}
                     </p>
                   )}
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 truncate">
+                  <p className="text-xs text-[#8a8470] dark:text-[#c7c1a8] mt-1 truncate">
                     {new URL(currentPage.url).hostname}
                   </p>
                 </div>
               </div>
             </div>
           </div>
-        </div>
-      )}
+        )} */}
 
-      {/* Templates */}
-      <div className="flex-1 p-3 overflow-y-auto">
-        <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-2">Templates</h3>
-        <div className="space-y-1">
-          {templates.map((template) => (
-            <button
-              key={template.id}
-              onClick={() => handleTemplateClick(template)}
-              disabled={isProcessing}
-              className="w-full text-left px-2.5 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-[#da7756]/10 dark:hover:bg-[#da7756]/20 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
-              title={template.description}
-            >
-              <div className="font-medium text-sm">{template.name}</div>
-              <div className="text-xs text-gray-500 dark:text-gray-400 truncate">{template.description}</div>
-            </button>
-          ))}
-          {templates.length === 0 && (
-            <p className="text-xs text-gray-500 dark:text-gray-400 text-center py-3">
-              No templates available
-            </p>
-          )}
+        {/* Templates Section */}
+        <div className="space-y-3">
+          <h3 className="text-sm font-semibold text-[#3d3929] dark:text-[#f0eee5] border-b border-[#d4d0c1]/30 dark:border-[#4a453c]/30 pb-1">Templates</h3>
+          <div className="space-y-2">
+            {templates.map((template) => (
+              <button
+                key={template.id}
+                onClick={() => handleTemplateClick(template)}
+                disabled={isProcessing}
+                className="w-full text-left p-3 rounded-xl bg-[#f5f3ea]/80 dark:bg-[#342f28]/80 hover:bg-[#da7756]/10 dark:hover:bg-[#da7756]/20 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 border border-[#e8e4d5]/50 dark:border-[#4a453c]/50 hover:border-[#da7756]/30 group hover:scale-[1.01] active:scale-[0.99]"
+                title={template.description}
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-2 h-2 bg-[#da7756] rounded-full flex-shrink-0"></div>
+                  <div className="flex-1 min-w-0">
+                    <div className="text-sm font-medium text-[#3d3929] dark:text-[#f0eee5] group-hover:text-[#bd5d3a] dark:group-hover:text-[#da7756] transition-colors">
+                      {template.name}
+                    </div>
+                    <div className="text-xs text-[#8a8470] dark:text-[#c7c1a8] truncate mt-0.5">
+                      {template.description}
+                    </div>
+                  </div>
+                  <svg className="w-3 h-3 text-[#8a8470] dark:text-[#c7c1a8] opacity-0 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
+                  </svg>
+                </div>
+              </button>
+            ))}
+            {templates.length === 0 && (
+              <div className="text-center py-6">
+                <svg className="w-8 h-8 text-[#8a8470] dark:text-[#c7c1a8] mx-auto mb-2 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                <p className="text-xs text-[#8a8470] dark:text-[#c7c1a8]">
+                  No templates available
+                </p>
+              </div>
+            )}
+          </div>
         </div>
+
+        {/* Bottom Padding for Better Scrolling */}
+        <div className="h-4"></div>
       </div>
     </aside>
   );

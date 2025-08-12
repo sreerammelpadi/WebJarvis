@@ -185,9 +185,9 @@ const Popup: React.FC = () => {
   }
 
   return (
-    <div className="w-[600px] h-[600px] bg-white dark:bg-gray-900 flex flex-col overflow-hidden fixed inset-0">
+    <div className="w-[600px] h-[600px] bg-white dark:bg-gray-900 flex flex-col overflow-hidden fixed inset-0 relative">
       {/* Compact Header */}
-      <header className="px-4 py-3 bg-gradient-to-r from-[#c86b4a] via-[#b25a40] to-[#9d4a2e] text-white">
+      <header className="px-4 py-3 bg-gradient-to-r from-[#c86b4a] via-[#b25a40] to-[#9d4a2e] text-white relative z-20">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <button onClick={() => setShowSidebar(!showSidebar)} className={`p-2 rounded-xl bg-white/20 hover:bg-white/30 backdrop-blur-sm transition-all duration-300 active:scale-95 ${showSidebar ? 'rotate-180' : ''}`} title={showSidebar ? 'Hide panel' : 'Show panel'}>
@@ -215,13 +215,28 @@ const Popup: React.FC = () => {
         </div>
       </header>
 
-      {/* Main Content */}
-      <main className="flex-1 flex min-h-0 overflow-hidden">
-        <div className={`transform transition-all duration-300 ease-in-out ${showSidebar ? 'translate-x-0 opacity-100' : '-translate-x-full opacity-0 w-0'}`}>
-          {showSidebar && (<LeftNav currentPage={state.currentPage} onQuickAction={sendMessage} isProcessing={isProcessing} />)}
-        </div>
-        <div className={`flex-1 transition-all duration-300 ease-in-out ${showSidebar ? 'ml-1' : 'ml-0'}`}>
+      {/* Main Content - Full Width */}
+      <main className="flex-1 flex min-h-0 overflow-hidden relative">
+        {/* Full Width Chat Area */}
+        <div className="w-full">
           <InlineChatWindow messages={messages} onSendMessage={sendMessage} isProcessing={isProcessing} currentPage={state.currentPage} />
+        </div>
+
+        {/* Overlay Backdrop */}
+        {showSidebar && (
+          <div 
+            className="absolute inset-0 bg-black/20 backdrop-blur-sm z-10 transition-all duration-300"
+            onClick={() => setShowSidebar(false)}
+          />
+        )}
+
+        {/* Floating LeftNav Overlay */}
+        <div className={`absolute top-0 left-0 h-full z-20 transform transition-all duration-300 ease-in-out ${
+          showSidebar ? 'translate-x-0 opacity-100' : '-translate-x-full opacity-0'
+        }`}>
+          <div className="h-full shadow-2xl">
+            <LeftNav currentPage={state.currentPage} onQuickAction={sendMessage} isProcessing={isProcessing} />
+          </div>
         </div>
       </main>
     </div>

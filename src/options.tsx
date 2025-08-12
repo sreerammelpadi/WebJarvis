@@ -63,21 +63,19 @@ const OptionsPage: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div className="flex items-center justify-center min-h-screen bg-[#eeece2] dark:bg-[#2a2520]">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-500 mx-auto mb-4"></div>
-          <p className="text-sm text-gray-600 dark:text-gray-400">Loading settings...</p>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#da7756] mx-auto mb-4"></div>
+          <p className="text-sm text-[#6b6651] dark:text-[#c7c1a8]">Loading settings...</p>
         </div>
       </div>
     );
   }
 
-  // Replace the entire return statement in your OptionsPage component:
-
   return (
-    <div className="min-h-screen bg-white dark:bg-gray-900">
-      {/* Header with gradient matching popup */}
-      <header className="px-6 py-5 bg-gradient-to-r from-blue-600 via-purple-600 to-cyan-600 text-white">
+    <div className="min-h-screen bg-[#eeece2] dark:bg-[#2a2520] w-full">
+      {/* Header with Claude gradient */}
+      <header className="px-6 py-5 bg-gradient-to-r from-[#c86b4a] via-[#b25a40] to-[#9d4a2e] text-white w-full">
         <div className="max-w-5xl mx-auto">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
@@ -103,9 +101,9 @@ const OptionsPage: React.FC = () => {
         </div>
       </header>
 
-      <main className="max-w-5xl mx-auto px-6 py-8">
+      <main className="max-w-5xl mx-auto px-6 py-8 w-full">
         {/* Tab Navigation */}
-        <div className="flex gap-3 mb-8">
+        <div className="flex flex-wrap gap-3 mb-8">
           {[
             { id: 'general', label: 'General', icon: '⚙️' },
             { id: 'ai', label: 'AI Models', icon: '🤖' },
@@ -117,8 +115,8 @@ const OptionsPage: React.FC = () => {
               onClick={() => setActiveTab(tab.id)}
               className={`flex items-center gap-2 px-6 py-3 rounded-2xl font-medium transition-all duration-300 ${
                 activeTab === tab.id
-                  ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg hover:shadow-xl'
-                  : 'bg-gray-50 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                  ? 'bg-gradient-to-r from-[#da7756] to-[#bd5d3a] text-white shadow-lg hover:shadow-xl'
+                  : 'bg-[#f5f3ea] dark:bg-[#342f28] text-[#3d3929] dark:text-[#f0eee5] hover:bg-[#da7756]/10 dark:hover:bg-[#da7756]/20 border border-[#e8e4d5] dark:border-[#4a453c]'
               }`}
             >
               <span className="text-lg">{tab.icon}</span>
@@ -128,17 +126,17 @@ const OptionsPage: React.FC = () => {
         </div>
 
         {/* Settings Panel */}
-        <div className="bg-white dark:bg-gray-900 rounded-3xl shadow-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
-          <div className="p-8 space-y-8">
+        <div className="bg-[#f5f3ea]/80 dark:bg-[#342f28]/80 rounded-3xl shadow-xl border border-[#e8e4d5] dark:border-[#4a453c] overflow-hidden backdrop-blur-sm w-full">
+          <div className="p-8 space-y-8 w-full">
             {activeTab === 'general' && (
-              <div className="space-y-8">
-                <div className="grid sm:grid-cols-2 gap-8">
-                  <div className="space-y-3">
-                    <label className="block text-sm font-semibold text-gray-900 dark:text-white">Theme</label>
+              <div className="space-y-8 w-full">
+                <div className="grid gap-6 sm:grid-cols-2 w-full">
+                  <div className="space-y-3 w-full">
+                    <label className="block text-sm font-semibold text-[#3d3929] dark:text-[#f0eee5]">Theme</label>
                     <select 
                       value={settings.theme} 
                       onChange={(e) => handleSettingChange('theme', e.target.value as any)} 
-                      className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                      className="w-full px-4 py-3 border border-[#d4d0c1] dark:border-[#4a453c] rounded-xl bg-[#eeece2] dark:bg-[#2a2520] text-[#3d3929] dark:text-[#f0eee5] focus:ring-2 focus:ring-[#da7756] focus:border-transparent transition-all duration-200"
                     >
                       <option value="auto">Auto (follow system)</option>
                       <option value="light">Light</option>
@@ -146,12 +144,12 @@ const OptionsPage: React.FC = () => {
                     </select>
                   </div>
                   
-                  <div className="space-y-3">
-                    <label className="block text-sm font-semibold text-gray-900 dark:text-white">Language</label>
+                  <div className="space-y-3 w-full">
+                    <label className="block text-sm font-semibold text-[#3d3929] dark:text-[#f0eee5]">Language</label>
                     <select 
                       value={settings.language} 
                       onChange={(e) => handleSettingChange('language', e.target.value)} 
-                      className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                      className="w-full px-4 py-3 border border-[#d4d0c1] dark:border-[#4a453c] rounded-xl bg-[#eeece2] dark:bg-[#2a2520] text-[#3d3929] dark:text-[#f0eee5] focus:ring-2 focus:ring-[#da7756] focus:border-transparent transition-all duration-200"
                     >
                       <option value="en">English</option>
                       <option value="es">Español</option>
@@ -160,22 +158,22 @@ const OptionsPage: React.FC = () => {
                     </select>
                   </div>
                   
-                  <div className="space-y-3">
-                    <label className="block text-sm font-semibold text-gray-900 dark:text-white">Maximum Response Tokens</label>
+                  <div className="space-y-3 w-full">
+                    <label className="block text-sm font-semibold text-[#3d3929] dark:text-[#f0eee5]">Maximum Response Tokens</label>
                     <input 
                       type="number" 
                       value={settings.maxTokens} 
                       onChange={(e) => handleSettingChange('maxTokens', parseInt(e.target.value || '0'))} 
                       min={100} 
                       max={4000} 
-                      className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                      className="w-full px-4 py-3 border border-[#d4d0c1] dark:border-[#4a453c] rounded-xl bg-[#eeece2] dark:bg-[#2a2520] text-[#3d3929] dark:text-[#f0eee5] focus:ring-2 focus:ring-[#da7756] focus:border-transparent transition-all duration-200"
                     />
                   </div>
                   
-                  <div className="space-y-3">
-                    <label className="block text-sm font-semibold text-gray-900 dark:text-white">Cost Warning Threshold</label>
-                    <div className="relative">
-                      <span className="absolute left-4 top-3.5 text-gray-500 dark:text-gray-400">$</span>
+                  <div className="space-y-3 w-full">
+                    <label className="block text-sm font-semibold text-[#3d3929] dark:text-[#f0eee5]">Cost Warning Threshold</label>
+                    <div className="relative w-full">
+                      <span className="absolute left-4 top-3.5 text-[#8a8470] dark:text-[#c7c1a8]">$</span>
                       <input 
                         type="number" 
                         value={settings.costThreshold} 
@@ -183,7 +181,7 @@ const OptionsPage: React.FC = () => {
                         min={0.01} 
                         max={10} 
                         step={0.01} 
-                        className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                        className="w-full pl-10 pr-4 py-3 border border-[#d4d0c1] dark:border-[#4a453c] rounded-xl bg-[#eeece2] dark:bg-[#2a2520] text-[#3d3929] dark:text-[#f0eee5] focus:ring-2 focus:ring-[#da7756] focus:border-transparent transition-all duration-200"
                       />
                     </div>
                   </div>
@@ -192,14 +190,14 @@ const OptionsPage: React.FC = () => {
             )}
 
             {activeTab === 'ai' && (
-              <div className="space-y-8">
-                <div className="grid sm:grid-cols-2 gap-8">
-                  <div className="space-y-3">
-                    <label className="block text-sm font-semibold text-gray-900 dark:text-white">Default Language Model</label>
+              <div className="space-y-8 w-full">
+                <div className="grid gap-6 sm:grid-cols-2 w-full">
+                  <div className="space-y-3 w-full">
+                    <label className="block text-sm font-semibold text-[#3d3929] dark:text-[#f0eee5]">Default Language Model</label>
                     <select 
                       value={settings.defaultModel} 
                       onChange={(e) => handleSettingChange('defaultModel', e.target.value as any)} 
-                      className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                      className="w-full px-4 py-3 border border-[#d4d0c1] dark:border-[#4a453c] rounded-xl bg-[#eeece2] dark:bg-[#2a2520] text-[#3d3929] dark:text-[#f0eee5] focus:ring-2 focus:ring-[#da7756] focus:border-transparent transition-all duration-200"
                     >
                       <option value="gpt-4o-mini">GPT-4o Mini (Recommended)</option>
                       <option value="gpt-3.5-turbo">GPT-3.5 Turbo (Faster, cheaper)</option>
@@ -207,12 +205,12 @@ const OptionsPage: React.FC = () => {
                     </select>
                   </div>
                   
-                  <div className="space-y-3">
-                    <label className="block text-sm font-semibold text-gray-900 dark:text-white">Embedding Model</label>
+                  <div className="space-y-3 w-full">
+                    <label className="block text-sm font-semibold text-[#3d3929] dark:text-[#f0eee5]">Embedding Model</label>
                     <select 
                       value={settings.embeddingModel} 
                       onChange={(e) => handleSettingChange('embeddingModel', e.target.value as any)} 
-                      className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                      className="w-full px-4 py-3 border border-[#d4d0c1] dark:border-[#4a453c] rounded-xl bg-[#eeece2] dark:bg-[#2a2520] text-[#3d3929] dark:text-[#f0eee5] focus:ring-2 focus:ring-[#da7756] focus:border-transparent transition-all duration-200"
                     >
                       <option value="text-embedding-3-small">text-embedding-3-small (Recommended)</option>
                       <option value="local-wasm">Local WASM (Offline, experimental)</option>
@@ -220,32 +218,32 @@ const OptionsPage: React.FC = () => {
                   </div>
                 </div>
                 
-                <div className="space-y-3">
-                  <label className="block text-sm font-semibold text-gray-900 dark:text-white">OpenAI API Key</label>
+                <div className="space-y-3 w-full">
+                  <label className="block text-sm font-semibold text-[#3d3929] dark:text-[#f0eee5]">OpenAI API Key</label>
                   <input 
                     type="password" 
                     value={settings.openaiApiKey || ''} 
                     onChange={(e) => handleSettingChange('openaiApiKey', e.target.value)} 
                     placeholder="sk-..." 
-                    className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                    className="w-full px-4 py-3 border border-[#d4d0c1] dark:border-[#4a453c] rounded-xl bg-[#eeece2] dark:bg-[#2a2520] text-[#3d3929] dark:text-[#f0eee5] focus:ring-2 focus:ring-[#da7756] focus:border-transparent transition-all duration-200"
                   />
                 </div>
               </div>
             )}
 
             {activeTab === 'storage' && (
-              <div className="space-y-8">
-                <div className="flex items-center gap-3 p-4 bg-gray-50 dark:bg-gray-800 rounded-xl">
+              <div className="space-y-8 w-full">
+                <div className="flex items-center gap-3 p-4 bg-[#eeece2] dark:bg-[#2a2520] rounded-xl border border-[#d4d0c1] dark:border-[#4a453c]">
                   <input 
                     type="checkbox" 
                     checked={settings.enableCloudStorage} 
                     onChange={(e) => handleSettingChange('enableCloudStorage', e.target.checked)} 
-                    className="w-5 h-5 text-blue-600 rounded focus:ring-blue-500"
+                    className="w-5 h-5 text-[#da7756] rounded focus:ring-[#da7756]"
                   />
-                  <span className="text-sm font-medium text-gray-900 dark:text-white">Enable cloud storage (Supabase)</span>
+                  <span className="text-sm font-medium text-[#3d3929] dark:text-[#f0eee5]">Enable cloud storage (Supabase)</span>
                 </div>
                 
-                <div className="flex gap-4">
+                <div className="flex flex-wrap gap-4">
                   <button 
                     onClick={async () => {
                       const result = await chrome.storage.local.get(null);
@@ -257,7 +255,7 @@ const OptionsPage: React.FC = () => {
                       a.click(); 
                       URL.revokeObjectURL(url);
                     }} 
-                    className="px-6 py-3 bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-700 hover:to-gray-800 text-white rounded-xl font-medium transition-all duration-200 shadow-lg hover:shadow-xl"
+                    className="px-6 py-3 bg-gradient-to-r from-[#8a8470] to-[#6b6651] hover:from-[#6b6651] hover:to-[#3d3929] text-white rounded-xl font-medium transition-all duration-200 shadow-lg hover:shadow-xl"
                   >
                     📤 Export Data
                   </button>
@@ -276,7 +274,7 @@ const OptionsPage: React.FC = () => {
                       };
                       input.click();
                     }} 
-                    className="px-6 py-3 bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-700 hover:to-gray-800 text-white rounded-xl font-medium transition-all duration-200 shadow-lg hover:shadow-xl"
+                    className="px-6 py-3 bg-gradient-to-r from-[#8a8470] to-[#6b6651] hover:from-[#6b6651] hover:to-[#3d3929] text-white rounded-xl font-medium transition-all duration-200 shadow-lg hover:shadow-xl"
                   >
                     📥 Import Data
                   </button>
@@ -285,8 +283,8 @@ const OptionsPage: React.FC = () => {
             )}
 
             {activeTab === 'advanced' && (
-              <div className="space-y-6">
-                <div className="p-6 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl">
+              <div className="space-y-6 w-full">
+                <div className="p-6 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl w-full">
                   <h3 className="text-lg font-semibold text-red-900 dark:text-red-100 mb-3">Danger Zone</h3>
                   <p className="text-sm text-red-700 dark:text-red-300 mb-4">This action will reset all your settings to their default values. This cannot be undone.</p>
                   <button 
@@ -303,12 +301,12 @@ const OptionsPage: React.FC = () => {
       </main>
 
       {/* Fixed bottom save bar */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white/95 dark:bg-gray-900/95 backdrop-blur border-t border-gray-200 dark:border-gray-700 p-6 shadow-2xl">
+      <div className="fixed bottom-0 left-0 right-0 bg-[#eeece2]/95 dark:bg-[#2a2520]/95 backdrop-blur border-t border-[#d4d0c1] dark:border-[#4a453c] p-6 shadow-2xl w-full">
         <div className="max-w-5xl mx-auto flex justify-end">
           <button 
             id="save-settings" 
             onClick={handleSave} 
-            className="px-8 py-3 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white rounded-xl font-semibold transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-105"
+            className="px-8 py-3 bg-gradient-to-r from-[#da7756] to-[#bd5d3a] hover:from-[#bd5d3a] hover:to-[#a8462a] text-white rounded-xl font-semibold transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-105"
           >
             💾 Save Settings
           </button>
@@ -319,4 +317,4 @@ const OptionsPage: React.FC = () => {
 };
 
 const root = ReactDOM.createRoot(document.getElementById('root')!);
-root.render(<OptionsPage />); 
+root.render(<OptionsPage />);
