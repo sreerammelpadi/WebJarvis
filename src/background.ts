@@ -134,34 +134,23 @@ class BackgroundServiceWorker {
     }
   }
 
-  private extractRelevantSnippets(content: string, query: string, limitChars = 1000): string[] {
-    const text = content || '';
+  private extractRelevantSnippets(content: string, query: string, limitChars = 1500): string[] {
+    const text = (content || '').replace(/\s+/g, ' ');
     const q = (query || '').toLowerCase();
-    const keywords = new Set(
-      q
-        .split(/[^a-z0-9+.-]+/i)
-        .filter(w => w.length > 1)
-        .concat(['price', 'pricing', 'cost', 'token', 'per', '1m', 'million', 'models', 'mini', '4o', 'o1', 'o3', 'gpt-4o', '4o-mini'])
-        .map(w => w.toLowerCase())
-    );
-    const sentences = text.split(/(?<=[.!?\n])\s+/);
+    const baseKeys = ['price','pricing','pay','salary','compensation','token','per','1m','million','applicants','applied','followers','compare','benefits','requirements','skills','bottom','footer','jobs','openings','mini','4o','o1','o3'];
+    const queryTerms = q.split(/[^a-z0-9+.-]+/i).filter(w => w.length > 1);
+    const keys = new Set([...baseKeys, ...queryTerms].map(w => w.toLowerCase()));
+    const sentences = text.split(/(?<=[.!?])\s+/);
     const hits: string[] = [];
     for (const s of sentences) {
       const sLower = s.toLowerCase();
-      for (const k of keywords) {
-        if (k && sLower.includes(k)) { hits.push(s.trim()); break; }
-      }
+      for (const k of keys) { if (k && sLower.includes(k)) { hits.push(s.trim()); break; } }
       if (hits.join(' ').length >= limitChars) break;
     }
-    // De-duplicate and trim
     const uniq: string[] = [];
     const seen = new Set<string>();
-    for (const h of hits) {
-      const t = h.replace(/\s+/g, ' ').trim();
-      if (!seen.has(t)) { seen.add(t); uniq.push(t); }
-      if (uniq.join(' ').length >= limitChars) break;
-    }
-    return uniq.slice(0, 8);
+    for (const h of hits) { const t = h.trim(); if (!seen.has(t)) { seen.add(t); uniq.push(t); } if (uniq.join(' ').length >= limitChars) break; }
+    return uniq.slice(0, 12);
   }
 
   /**
@@ -190,16 +179,17 @@ class BackgroundServiceWorker {
       if (lastSelection?.text) contextParts.push(`User selection: ${lastSelection.text}`);
       if (currentPage?.content) {
         const content = String(currentPage.content);
-        const maxContextTokens = Math.max(256, Math.floor(maxTokens * 0.6));
-        const maxContextChars = maxContextTokens * 4;
-        contextParts.push(`Page content:\n${content.slice(0, maxContextChars)}`);
+        const MAX_CHARS = 10000; // generous slice of content for precision
+        contextParts.push(`Page content:\n${content.slice(0, MAX_CHARS)}`);
+        // Add focused snippets shaped by the current question
+        const snippets = this.extractRelevantSnippets(content, userMessage, 1500);
+        if (snippets.length) contextParts.push(`Focused snippets:\n- ${snippets.join('\n- ')}`);
       }
 
-      // Add recent conversation transcript to maintain context
       let conversationText = '';
       try {
         const history: ChatMessage[] = Array.isArray(chatHistory) ? chatHistory : [];
-        const lastN = history.slice(-8); // last 8 messages
+        const lastN = history.slice(-8);
         const lines: string[] = [];
         for (const m of lastN) {
           if (m.role === 'system') continue;
@@ -217,7 +207,7 @@ class BackgroundServiceWorker {
       parts.push(`Question: ${userMessage}`);
       const userPrompt = parts.join('\n\n');
 
-      const systemPrompt = 'You are WebCopilot, a helpful, concise, and professional AI assistant for web pages. Use the provided page context faithfully. If context is limited, state limitations and ask clarifying questions.';
+      const systemPrompt = 'You are WebCopilot, a precise and professional AI assistant for web pages. Always cite exact facts from the provided page context; if the specific detail is not in the context, say so briefly.';
 
       logger.info('Generating response');
       const result = await this.llm.generateResponse(systemPrompt, userPrompt, maxTokens);
@@ -279,27 +269,12 @@ class BackgroundServiceWorker {
               const url = window.location.href;
               const title = document.title || '';
               const desc = (document.querySelector('meta[name="description"]') as HTMLMetaElement)?.content || '';
-              // Prefer visible text to avoid heavy HTML
               const bodyText = trim(document.body?.innerText || document.body?.textContent || '');
               const content = bodyText.slice(0, 50000);
-              // Simple hash
               let h = 0;
               const base = `${url}|${title}|${content.substring(0, 1000)}`;
-              for (let i = 0; i < base.length; i++) {
-                h = ((h << 5) - h) + base.charCodeAt(i);
-                h |= 0;
-              }
-              return {
-                success: true,
-                data: {
-                  url,
-                  title,
-                  description: desc,
-                  content,
-                  extractedAt: Date.now(),
-                  hash: Math.abs(h).toString(36)
-                }
-              };
+              for (let i = 0; i < base.length; i++) { h = ((h << 5) - h) + base.charCodeAt(i); h |= 0; }
+              return { success: true, data: { url, title, description: desc, content, extractedAt: Date.now(), hash: Math.abs(h).toString(36) } };
             } catch (e: any) {
               return { success: false, error: e?.message || 'Fallback failed' };
             }
