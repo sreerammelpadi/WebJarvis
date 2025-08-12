@@ -105,18 +105,13 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
           }`}></div>
         </div>
         
-        {/* Timestamp and metadata */}
+        {/* Timestamp */}
         <div className={`flex items-center gap-1.5 mt-1.5 text-xs text-gray-500 dark:text-gray-400 ${
           isUser ? 'justify-end' : 'justify-start'
         }`}>
           <span className="bg-white/60 dark:bg-gray-800/60 px-1.5 py-0.5 rounded-full backdrop-blur-sm text-xs">
             {formatTimestamp(message.timestamp)}
           </span>
-          {message.metadata?.cost !== undefined && (
-            <span className="bg-[#da7756]/10 dark:bg-[#da7756]/20 text-[#bd5d3a] dark:text-[#da7756] px-1.5 py-0.5 rounded-full backdrop-blur-sm text-xs">
-              ${message.metadata.cost.toFixed(4)}
-            </span>
-          )}
         </div>
 
         {/* Context information */}

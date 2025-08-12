@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import ReactDOM from 'react-dom/client';
 import { LeftNav } from './components/LeftNav';
 import { useExtensionState } from './hooks/useExtensionState';
@@ -144,6 +144,14 @@ const Popup: React.FC = () => {
   const { state, updateState } = useExtensionState();
   const { sendMessage, messages, isProcessing, clearChat } = useChat();
 
+  const totalTokens = useMemo(() => {
+    let sum = 0;
+    for (const m of messages) {
+      if (m.metadata?.tokens) sum += Number(m.metadata.tokens) || 0;
+    }
+    return sum;
+  }, [messages]);
+
   useEffect(() => {
     const init = async () => {
       try {
@@ -175,10 +183,7 @@ const Popup: React.FC = () => {
           <div className="w-12 h-12 mx-auto rounded-full bg-gradient-to-tr from-[#da7756] via-[#f8ece7] to-[#f2d4c7] flex items-center justify-center shadow-lg">
             <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clipRule="evenodd" /></svg>
           </div>
-          <div className="space-y-1">
-            <h3 className="text-base font-semibold text-gray-900 dark:text-white">WebCopilot</h3>
-            <p className="text-sm text-gray-600 dark:text-gray-300">Initializing your AI assistant...</p>
-          </div>
+          <div className="space-y-1"><h3 className="text-base font-semibold text-gray-900 dark:text-white">WebCopilot</h3><p className="text-sm text-gray-600 dark:text-gray-300">Initializing your AI assistant...</p></div>
         </div>
       </div>
     );
@@ -193,20 +198,18 @@ const Popup: React.FC = () => {
             <button onClick={() => setShowSidebar(!showSidebar)} className={`p-2 rounded-xl bg-white/20 hover:bg-white/30 backdrop-blur-sm transition-all duration-300 active:scale-95 ${showSidebar ? 'rotate-180' : ''}`} title={showSidebar ? 'Hide panel' : 'Show panel'}>
               <svg className="w-4 h-4 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h8m-8 6h16" /></svg>
             </button>
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
-                <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clipRule="evenodd" /></svg>
-              </div>
-              <div>
-                <h1 className="text-base font-bold tracking-tight">WebCopilot</h1>
-                <p className="text-xs opacity-90 font-medium">AI Web Assistant</p>
-              </div>
-            </div>
+            <div className="flex items-center gap-2"><div className="w-8 h-8 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center"><svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clipRule="evenodd" /></svg></div><div><h1 className="text-base font-bold tracking-tight">WebCopilot</h1><p className="text-xs opacity-90 font-medium">AI Web Assistant</p></div></div>
           </div>
           <div className="flex items-center gap-2">
-            <div className="flex items-center gap-1.5 px-2 py-1 bg-white/20 rounded-full text-xs font-medium backdrop-blur-sm">
-              <div className="w-1.5 h-1.5 bg-green-400 rounded-full"></div>
-              <span>Online</span>
+            {/* Tokens pill replacing Online */}
+            <div className="relative group">
+              <button className="flex items-center gap-1.5 px-2 py-1 bg-white/20 rounded-full text-xs font-medium backdrop-blur-sm">
+                <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a1 1 0 011 1v1.06a5.002 5.002 0 013.9 3.9H16a1 1 0 110 2h-1.1a5.002 5.002 0 01-3.9 3.9V17a1 1 0 11-2 0v-1.14A5.002 5.002 0 015.1 9.96H4a1 1 0 110-2h1.1A5.002 5.002 0 019 4.06V3a1 1 0 011-1zm0 4a3 3 0 100 6 3 3 0 000-6z"/></svg>
+                <span>Tokens</span>
+              </button>
+              <div className="absolute right-0 mt-2 w-max max-w-xs px-2 py-1 rounded-md bg-gray-900 text-white text-xs opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity">
+                Total tokens in this chat: {totalTokens}
+              </div>
             </div>
             <button onClick={() => chrome.runtime.openOptionsPage()} className="p-2 rounded-xl bg-white/20 hover:bg-white/30 backdrop-blur-sm transition-all duration-300 active:scale-95" title="Settings">
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
@@ -218,25 +221,12 @@ const Popup: React.FC = () => {
       {/* Main Content - Full Width */}
       <main className="flex-1 flex min-h-0 overflow-hidden relative">
         {/* Full Width Chat Area */}
-        <div className="w-full">
-          <InlineChatWindow messages={messages} onSendMessage={sendMessage} isProcessing={isProcessing} currentPage={state.currentPage} />
-        </div>
-
-        {/* Overlay Backdrop */}
+        <div className="w-full"><InlineChatWindow messages={messages} onSendMessage={sendMessage} isProcessing={isProcessing} currentPage={state.currentPage} /></div>
         {showSidebar && (
-          <div 
-            className="absolute inset-0 bg-black/20 backdrop-blur-sm z-10 transition-all duration-300"
-            onClick={() => setShowSidebar(false)}
-          />
+          <div className="absolute inset-0 bg-black/20 backdrop-blur-sm z-10 transition-all duration-300" onClick={() => setShowSidebar(false)} />
         )}
-
-        {/* Floating LeftNav Overlay */}
-        <div className={`absolute top-0 left-0 h-full z-20 transform transition-all duration-300 ease-in-out ${
-          showSidebar ? 'translate-x-0 opacity-100' : '-translate-x-full opacity-0'
-        }`}>
-          <div className="h-full shadow-2xl">
-            <LeftNav currentPage={state.currentPage} onQuickAction={sendMessage} isProcessing={isProcessing} />
-          </div>
+        <div className={`absolute top-0 left-0 h-full z-20 transform transition-all duration-300 ease-in-out ${showSidebar ? 'translate-x-0 opacity-100' : '-translate-x-full opacity-0'}`}>
+          <div className="h-full shadow-2xl"><LeftNav currentPage={state.currentPage} onQuickAction={sendMessage} isProcessing={isProcessing} /></div>
         </div>
       </main>
     </div>
