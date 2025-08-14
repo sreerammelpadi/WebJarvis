@@ -28,9 +28,15 @@ const InlineChatWindow: React.FC<{
   useEffect(() => {
     if (inputRef.current) {
       inputRef.current.style.height = 'auto';
-      inputRef.current.style.height = Math.min(inputRef.current.scrollHeight, 100) + 'px';
+      inputRef.current.style.height = Math.min(inputRef.current.scrollHeight, 80) + 'px';
     }
   }, [inputValue]);
+  // Refocus input when processing completes (assistant response added)
+  useEffect(() => {
+    if (!isProcessing) {
+      inputRef.current?.focus();
+    }
+  }, [isProcessing]);
 
   const handleSend = () => {
     if (!inputValue.trim() || isProcessing) return;
@@ -38,6 +44,8 @@ const InlineChatWindow: React.FC<{
     onSendMessage(inputValue, context);
     setInputValue('');
     setEstimatedCost(null);
+    // Ensure focus stays on the input for immediate follow-up typing
+    setTimeout(() => inputRef.current?.focus(), 0);
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -57,7 +65,7 @@ const InlineChatWindow: React.FC<{
   return (
     <div className="flex h-full w-full flex-col bg-white dark:bg-gray-900">
       {/* Messages Area */}
-      <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4 scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 scrollbar-track-transparent bg-white dark:bg-gray-900 min-h-0">
+      <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4 bg-white dark:bg-gray-900 min-h-0 chat-scrollbar">
         {messages.length === 0 ? (
           <div className="flex h-full items-center justify-center">
             <div className="text-center space-y-4 max-w-xs">
@@ -98,7 +106,7 @@ const InlineChatWindow: React.FC<{
       </div>
 
       {/* Input Area */}
-      <div className="px-4 py-3 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
+             <div className="px-4 py-1.5 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
         <div className="flex gap-3 items-end">
           <div className="flex-1 relative">
             <div className={`absolute inset-0 bg-gradient-to-r from-[#da7756]/6 to-[#bd5d3a]/6 rounded-2xl transition-all duration-300 ${inputFocused ? 'opacity-90 scale-102' : 'opacity-0 scale-100'}`}></div>
@@ -110,7 +118,7 @@ const InlineChatWindow: React.FC<{
               onFocus={() => setInputFocused(true)}
               onBlur={() => setInputFocused(false)}
               placeholder="Ask me anything about this page..."
-              className={`relative w-full min-h-[40px] max-h-[100px] px-4 py-3 pr-12 bg-gray-50 dark:bg-gray-800 rounded-2xl resize-none focus:outline-none text-sm text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 transition-all duration-150 ${inputFocused ? 'ring-2 ring-[#da7756]/40' : 'ring-0 hover:ring-1 hover:ring-gray-200/40'}`}
+              className={`relative w-full min-h-[36px] max-h-[80px] px-3 py-2 pr-10 bg-gray-50 dark:bg-gray-800 rounded-xl resize-none focus:outline-none text-sm text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 transition-all duration-150 ${inputFocused ? 'ring-2 ring-[#da7756]/40' : 'ring-0 hover:ring-1 hover:ring-gray-200/40'}`}
               rows={1}
               disabled={isProcessing}
             />
@@ -120,7 +128,7 @@ const InlineChatWindow: React.FC<{
               </button>
             )}
           </div>
-          <button onClick={handleSend} disabled={!inputValue.trim() || isProcessing} className={`group relative p-3 bg-gradient-to-r from-[#da7756] to-[#bd5d3a] hover:from-[#bd5d3a] hover:to-[#a8462a] disabled:from-gray-400 disabled:to-gray-500 text-white rounded-full shadow-md hover:shadow-lg disabled:shadow-sm transition-all duration-150 flex items-center justify-center min-w-[40px] overflow-hidden ${!inputValue.trim() || isProcessing ? 'scale-95 opacity-70' : 'scale-100 opacity-100 hover:scale-105'}`}>
+          <button onClick={handleSend} disabled={!inputValue.trim() || isProcessing} className={`group relative p-2.5 bg-gradient-to-r from-[#da7756] to-[#bd5d3a] hover:from-[#bd5d3a] hover:to-[#a8462a] disabled:from-gray-400 disabled:to-gray-500 text-white rounded-full shadow-md hover:shadow-lg disabled:shadow-sm transition-all duration-150 flex items-center justify-center min-w-[36px] overflow-hidden ${!inputValue.trim() || isProcessing ? 'scale-95 opacity-70' : 'scale-100 opacity-100 hover:scale-105'}`}>
             <div className="absolute inset-0 bg-white/10 scale-x-0 group-hover:scale-x-100 transition-transform duration-150 origin-left"></div>
             {isProcessing ? (<div className="relative w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />) : (
               <svg className="relative w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>
@@ -192,13 +200,13 @@ const Popup: React.FC = () => {
   return (
     <div className="w-[600px] h-[600px] bg-white dark:bg-gray-900 flex flex-col overflow-hidden fixed inset-0 relative">
       {/* Compact Header */}
-      <header className="px-4 py-3 bg-gradient-to-r from-[#c86b4a] via-[#b25a40] to-[#9d4a2e] text-white relative z-20">
+      <header className="px-4 py-1 bg-gradient-to-r from-[#c86b4a] via-[#b25a40] to-[#9d4a2e] text-white relative z-20 min-h-0 leading-none">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <button onClick={() => setShowSidebar(!showSidebar)} className={`p-2 rounded-xl bg-white/20 hover:bg-white/30 backdrop-blur-sm transition-all duration-300 active:scale-95 ${showSidebar ? 'rotate-180' : ''}`} title={showSidebar ? 'Hide panel' : 'Show panel'}>
               <svg className="w-4 h-4 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h8m-8 6h16" /></svg>
             </button>
-            <div className="flex items-center gap-2"><div className="w-8 h-8 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center"><svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clipRule="evenodd" /></svg></div><div><h1 className="text-base font-bold tracking-tight">WebCopilot</h1><p className="text-xs opacity-90 font-medium">AI Web Assistant</p></div></div>
+            <div className="flex items-center gap-2"><div className="w-6 h-6 rounded-lg bg-white/20 backdrop-blur-sm flex items-center justify-center"><svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clipRule="evenodd" /></svg></div><div><h1 className="text-sm font-bold tracking-tight">WebCopilot</h1><p className="text-xs opacity-90 font-medium">AI Web Assistant</p></div></div>
           </div>
           <div className="flex items-center gap-2">
             {/* Tokens pill replacing Online */}

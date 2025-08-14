@@ -57,6 +57,22 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
       const blocks = text.split(/\n\n+/);
       const elements: React.ReactNode[] = [];
 
+      const renderItalics = (str: string, baseKey: string) => {
+        // Render *text* or _text_ as italics, but ignore **bold**
+        const regex = /(\*(?!\*)([^*]+)\*|_([^_]+)_)/g;
+        const out: React.ReactNode[] = [];
+        let last = 0;
+        let m: RegExpExecArray | null;
+        while ((m = regex.exec(str)) !== null) {
+          if (m.index > last) out.push(<React.Fragment key={`${baseKey}-txt-${last}`}>{str.slice(last, m.index)}</React.Fragment>);
+          const content = (m[2] || m[3] || '').trim();
+          out.push(<em key={`${baseKey}-em-${m.index}`} className="italic">{content}</em>);
+          last = m.index + m[0].length;
+        }
+        if (last < str.length) out.push(<React.Fragment key={`${baseKey}-tail`}>{str.slice(last)}</React.Fragment>);
+        return out;
+      };
+
       const renderBoldAndInlineCode = (str: string, baseKey: string) => {
         // First handle inline code `code`
         const parts = str.split(/(`[^`]+`)/g);
@@ -83,21 +99,37 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
                 </strong>
               );
             }
-            return <React.Fragment key={`${baseKey}-text-${i}-${j}`}>{chunk}</React.Fragment>;
+            // Then handle italics within remaining text
+            return (
+              <React.Fragment key={`${baseKey}-text-${i}-${j}`}>
+                {renderItalics(chunk, `${baseKey}-ital-${i}-${j}`)}
+              </React.Fragment>
+            );
           });
         });
       };
 
       blocks.forEach((block, bi) => {
-        const lines = block.split('\n');
-        const isList = lines.every((l) => l.trim().startsWith('- ')) && lines.length > 0;
-        if (isList) {
+        // Normalize inline ordered list lines like "1. item 2. item" into separate lines
+        const normalized = block.replace(/\s+(?=\d+\.\s)/g, '\n');
+        const lines = normalized.split('\n');
+        const isUnordered = lines.length > 0 && lines.every((l) => l.trim().startsWith('- '));
+        const isOrdered = lines.length > 1 && lines.every((l) => /^\s*\d+\.\s+/.test(l));
+        if (isUnordered) {
           elements.push(
-            <ul key={`${keyPrefix}-ul-${bi}`} className="list-disc ml-5 space-y-1 text-sm">
+            <ul key={`${keyPrefix}-ul-${bi}`} className="list-disc list-inside pl-3 ml-0 space-y-1 text-sm">
               {lines.map((l, li) => (
                 <li key={`${keyPrefix}-li-${bi}-${li}`}>{renderBoldAndInlineCode(l.replace(/^\s*-\s*/, ''), `${keyPrefix}-li-${bi}-${li}`)}</li>
               ))}
             </ul>
+          );
+        } else if (isOrdered) {
+          elements.push(
+            <ol key={`${keyPrefix}-ol-${bi}`} className="list-decimal list-inside pl-3 ml-0 space-y-1 text-sm">
+              {lines.map((l, li) => (
+                <li key={`${keyPrefix}-oli-${bi}-${li}`}>{renderBoldAndInlineCode(l.replace(/^\s*\d+\.\s*/, ''), `${keyPrefix}-oli-${bi}-${li}`)}</li>
+              ))}
+            </ol>
           );
         } else {
           elements.push(
@@ -190,7 +222,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
       </div>
 
       {/* Message Content */}
-      <div className={`flex-1 max-w-[280px] ${isUser ? 'text-right' : ''}`}>
+      <div className={`flex-1 max-w-[75%] ${isUser ? 'text-right' : ''}`}>
         <div className={`relative inline-block px-4 py-2.5 rounded-2xl shadow-md backdrop-blur-sm transition-all duration-300 group-hover:shadow-lg ${
           isUser 
             ? 'bg-gradient-to-br from-[#da7756] via-[#bd5d3a] to-[#a8462a] text-white rounded-br-md' 
