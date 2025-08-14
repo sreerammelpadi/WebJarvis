@@ -8,6 +8,7 @@ interface MessageBubbleProps {
 export const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
   const isUser = message.role === 'user';
   const isSystem = message.role === 'system';
+  const [copiedKey, setCopiedKey] = React.useState<string | null>(null);
 
   const formatTimestamp = (timestamp: number) => {
     return new Date(timestamp).toLocaleTimeString([], { 
@@ -17,35 +18,145 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
   };
 
   const renderContent = (content: string) => {
-    const lines = content.split('\n');
-    return lines.map((line, index) => {
-      if (line.startsWith('``````')) {
-        const code = line.slice(3, -3);
-        return (
-          <pre key={index} className="bg-gray-100/80 dark:bg-gray-800/80 p-3 rounded-xl text-xs font-mono overflow-x-auto shadow-inner mt-2 border border-gray-200/50 dark:border-gray-700/50 backdrop-blur-sm">
-            {code}
-          </pre>
-        );
-      } else if (line.startsWith('- ')) {
-        return (
-          <div key={index} className="flex items-start mt-1 group">
-            <div className="w-1.5 h-1.5 bg-current rounded-full mt-1.5 mr-2 opacity-60 group-hover:opacity-100 transition-opacity duration-200"></div>
-            <span className="flex-1 text-sm">{line.slice(2)}</span>
+    const handleCopy = async (text: string, key: string) => {
+      try {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          await navigator.clipboard.writeText(text);
+        } else {
+          const ta = document.createElement('textarea');
+          ta.value = text;
+          ta.style.position = 'fixed';
+          ta.style.opacity = '0';
+          document.body.appendChild(ta);
+          ta.focus();
+          ta.select();
+          document.execCommand('copy');
+          document.body.removeChild(ta);
+        }
+        setCopiedKey(key);
+        setTimeout(() => setCopiedKey((prev) => (prev === key ? null : prev)), 1200);
+      } catch {}
+    };
+
+    // First, split content into segments separated by fenced code blocks ```lang\n...```
+    const codeBlockRegex = /```(\w+)?\n([\s\S]*?)```/g;
+    const segments: Array<{ type: 'code' | 'text'; lang?: string; text: string }> = [];
+    let lastIndex = 0;
+    let match: RegExpExecArray | null;
+    while ((match = codeBlockRegex.exec(content)) !== null) {
+      const before = content.slice(lastIndex, match.index);
+      if (before) segments.push({ type: 'text', text: before });
+      segments.push({ type: 'code', lang: match[1] || '', text: match[2] });
+      lastIndex = match.index + match[0].length;
+    }
+    const after = content.slice(lastIndex);
+    if (after) segments.push({ type: 'text', text: after });
+
+    const renderInline = (text: string, keyPrefix: string) => {
+      // Split into blocks by double newlines to form paragraphs/lists
+      const blocks = text.split(/\n\n+/);
+      const elements: React.ReactNode[] = [];
+
+      const renderBoldAndInlineCode = (str: string, baseKey: string) => {
+        // First handle inline code `code`
+        const parts = str.split(/(`[^`]+`)/g);
+        return parts.map((part, i) => {
+          if (part.startsWith('`') && part.endsWith('`') && part.length >= 2) {
+            const code = part.slice(1, -1);
+            return (
+              <code
+                key={`${baseKey}-code-${i}`}
+                className="px-1 py-0.5 rounded bg-gray-100/80 dark:bg-gray-800/80 text-[0.8rem] font-mono border border-gray-200/50 dark:border-gray-700/50"
+                style={{ fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace' }}
+              >
+                {code}
+              </code>
+            );
+          }
+          // Then handle bold **text**
+          const boldSplit = part.split(/(\*\*[^*]+\*\*)/g);
+          return boldSplit.map((chunk, j) => {
+            if (chunk.startsWith('**') && chunk.endsWith('**') && chunk.length > 4) {
+              return (
+                <strong key={`${baseKey}-bold-${i}-${j}`} className="font-semibold">
+                  {chunk.slice(2, -2)}
+                </strong>
+              );
+            }
+            return <React.Fragment key={`${baseKey}-text-${i}-${j}`}>{chunk}</React.Fragment>;
+          });
+        });
+      };
+
+      blocks.forEach((block, bi) => {
+        const lines = block.split('\n');
+        const isList = lines.every((l) => l.trim().startsWith('- ')) && lines.length > 0;
+        if (isList) {
+          elements.push(
+            <ul key={`${keyPrefix}-ul-${bi}`} className="list-disc ml-5 space-y-1 text-sm">
+              {lines.map((l, li) => (
+                <li key={`${keyPrefix}-li-${bi}-${li}`}>{renderBoldAndInlineCode(l.replace(/^\s*-\s*/, ''), `${keyPrefix}-li-${bi}-${li}`)}</li>
+              ))}
+            </ul>
+          );
+        } else {
+          elements.push(
+            <p key={`${keyPrefix}-p-${bi}`} className="leading-relaxed text-sm">
+              {renderBoldAndInlineCode(block, `${keyPrefix}-p-${bi}`)}
+            </p>
+          );
+        }
+      });
+
+      return elements;
+    };
+
+    const rendered: React.ReactNode[] = [];
+    segments.forEach((seg, i) => {
+      if (seg.type === 'code') {
+        const key = `code-${i}`;
+        rendered.push(
+          <div key={`${key}-wrap`} className="group relative">
+            <pre
+              className="bg-gray-900 text-gray-100 p-3 rounded-xl text-sm font-mono whitespace-pre overflow-x-auto shadow-inner mt-2 border border-gray-800"
+              style={{ fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, \"Liberation Mono\", \"Courier New\", monospace' }}
+            >
+              <code
+                className={`language-${seg.lang || 'plain'} whitespace-pre font-mono`}
+                style={{ fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, \"Liberation Mono\", \"Courier New\", monospace' }}
+              >
+                {seg.text}
+              </code>
+            </pre>
+            <button
+              aria-label={copiedKey === key ? 'Copied' : 'Copy code'}
+              title={copiedKey === key ? 'Copied' : 'Copy code'}
+              onClick={() => handleCopy(seg.text, key)}
+              className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-150 p-1.5 rounded bg-gray-800/90 hover:bg-gray-700 text-gray-200 border border-gray-700 shadow"
+            >
+              {copiedKey === key ? (
+                <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M20 6L9 17l-5-5" />
+                </svg>
+              ) : (
+                <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="9" y="9" width="10" height="10" rx="2" ry="2" />
+                  <rect x="5" y="5" width="10" height="10" rx="2" ry="2" />
+                </svg>
+              )}
+            </button>
           </div>
         );
-      } else if (line.startsWith('**') && line.endsWith('**')) {
-        const text = line.slice(2, -2);
-        return (
-          <div key={index} className="font-semibold bg-gradient-to-r from-[#da7756] to-[#bd5d3a] bg-clip-text text-transparent text-sm">
-            {text}
+      } else if (seg.text.trim()) {
+        rendered.push(
+          <div key={`text-${i}`} className="space-y-1">
+            {renderInline(seg.text, `seg-${i}`)}
           </div>
         );
-      } else if (line.trim() === '') {
-        return <br key={index} />;
-      } else {
-        return <div key={index} className="leading-relaxed text-sm">{line}</div>;
       }
     });
+
+    return rendered.length ? rendered : null;
   };
 
   if (isSystem) {
