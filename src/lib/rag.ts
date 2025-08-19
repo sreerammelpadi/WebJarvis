@@ -88,9 +88,9 @@ export class RAGSystem {
   ): string {
     let systemPrompt = 'You are WebCopilot, an AI assistant that helps users understand and interact with web content. ';
 
-    if (template?.template) {
+    if (template?.prompt) {
       // Replace placeholders in template
-      systemPrompt += this.replaceTemplatePlaceholders(template.template, contextText);
+      systemPrompt += this.replaceTemplatePlaceholders(template.prompt, contextText);
     } else {
       systemPrompt += 'Provide helpful, accurate, and concise responses based on the context provided. ';
       systemPrompt += 'If the context is insufficient, ask for clarification. ';
@@ -217,33 +217,27 @@ export class RAGSystem {
     return [
       {
         id: 'extract-job',
-        name: 'Extract Job Details',
+        title: 'Extract Job Details',
         description: 'Extract structured job information from the page',
-        template: 'Extract the following information from this job posting:\n- Title: {page_title}\n- Company: {company}\n- Description: {job_description}\n- Key Requirements\n- Responsibilities\n- Benefits\n\nFormat as JSON.',
-        placeholders: ['{page_title}', '{company}', '{job_description}'],
-        category: 'job',
+        prompt: 'Extract the following information from this job posting:\n- Title: {page_title}\n- Company: {company}\n- Description: {job_description}\n- Key Requirements\n- Responsibilities\n- Benefits\n\nFormat as JSON.',
         isDefault: true,
         createdAt: Date.now(),
         updatedAt: Date.now()
       },
       {
         id: 'summarize',
-        name: 'Summarize Content',
+        title: 'Summarize Content',
         description: 'Create a concise summary of the page content',
-        template: 'Provide a {summary_type} summary of the following content:\n\n{context}\n\nSummary:',
-        placeholders: ['{summary_type}', '{context}'],
-        category: 'general',
+        prompt: 'Provide a {summary_type} summary of the following content:\n\n{context}\n\nSummary:',
         isDefault: true,
         createdAt: Date.now(),
         updatedAt: Date.now()
       },
       {
         id: 'cover-letter',
-        name: 'Generate Cover Letter',
+        title: 'Generate Cover Letter',
         description: 'Create a tailored cover letter for this job',
-        template: 'Using this job description:\n{job_description}\n\nAnd my resume:\n{resume_snippet}\n\nGenerate a professional cover letter (350 words) highlighting relevant experience.',
-        placeholders: ['{job_description}', '{resume_snippet}'],
-        category: 'resume',
+        prompt: 'Using this job description:\n{job_description}\n\nAnd my resume:\n{resume_snippet}\n\nGenerate a professional cover letter (350 words) highlighting relevant experience.',
         isDefault: true,
         createdAt: Date.now(),
         updatedAt: Date.now()

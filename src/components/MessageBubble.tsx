@@ -99,6 +99,20 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
                 </strong>
               );
             }
+            // Handle single line breaks by splitting and adding <br/> elements
+            const lineBreakSplit = chunk.split('\n');
+            if (lineBreakSplit.length > 1) {
+              return (
+                <React.Fragment key={`${baseKey}-text-${i}-${j}`}>
+                  {lineBreakSplit.map((line, k) => (
+                    <React.Fragment key={`${baseKey}-line-${i}-${j}-${k}`}>
+                      {k > 0 && <br />}
+                      {renderItalics(line, `${baseKey}-ital-${i}-${j}-${k}`)}
+                    </React.Fragment>
+                  ))}
+                </React.Fragment>
+              );
+            }
             // Then handle italics within remaining text
             return (
               <React.Fragment key={`${baseKey}-text-${i}-${j}`}>

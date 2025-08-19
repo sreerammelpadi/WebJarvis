@@ -67,11 +67,9 @@ export interface MemoryChunk {
 
 export interface PromptTemplate {
   id: string;
-  name: string;
-  description: string;
-  template: string;
-  placeholders: string[];
-  category: 'job' | 'resume' | 'general' | 'summary';
+  title: string;
+  prompt: string;
+  description?: string;
   isDefault: boolean;
   createdAt: number;
   updatedAt: number;

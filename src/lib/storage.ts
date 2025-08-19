@@ -105,7 +105,7 @@ export class StorageManager {
     await tx.done;
   }
 
-  async getPromptTemplatesByCategory(category: PromptTemplate['category']): Promise<PromptTemplate[]> {
+  async getPromptTemplatesByCategory(category: string): Promise<PromptTemplate[]> {
     const tx = this.db.transaction('promptTemplates', 'readonly');
     const index = tx.objectStore('promptTemplates').index('category');
     const res = (await index.getAll(category)) as PromptTemplate[];
