@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import ReactDOM from 'react-dom/client';
 import { UserSettings } from '@/types';
+import { getModelDisplayInfo } from '@/lib/model-config';
 import './styles/options.css';
 
 const defaultSettings: UserSettings = {
@@ -199,9 +200,11 @@ const OptionsPage: React.FC = () => {
                       onChange={(e) => handleSettingChange('defaultModel', e.target.value as any)} 
                       className="w-full px-4 py-3 border border-[#d4d0c1] dark:border-[#4a453c] rounded-xl bg-[#eeece2] dark:bg-[#2a2520] text-[#3d3929] dark:text-[#f0eee5] focus:ring-2 focus:ring-[#da7756] focus:border-transparent transition-all duration-200"
                     >
-                      <option value="gpt-4o-mini">GPT-4o Mini (Recommended)</option>
-                      <option value="gpt-3.5-turbo">GPT-3.5 Turbo (Faster, cheaper)</option>
-                      <option value="local-wasm">Local WASM (Offline, experimental)</option>
+                      {getModelDisplayInfo().map((model) => (
+                        <option key={model.name} value={model.name}>
+                          {model.displayName} - {model.description}
+                        </option>
+                      ))}
                     </select>
                   </div>
                   

@@ -111,18 +111,61 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
 
       blocks.forEach((block, bi) => {
         // Normalize inline ordered list lines like "1. item 2. item" into separate lines
-        const normalized = block.replace(/\s+(?=\d+\.\s)/g, '\n');
+        let normalized = block.replace(/\s+(?=\d+\.\s)/g, '\n');
+        
+        // Also handle inline bullet points like "text • item1 • item2" by splitting them into separate lines
+        if (normalized.includes('•') && !normalized.includes('\n')) {
+          // Split on bullet points and create proper list items
+          const parts = normalized.split('•').map(p => p.trim()).filter(p => p);
+          if (parts.length > 1) {
+            // First part is the intro text, rest are list items
+            const [intro, ...items] = parts;
+            normalized = intro.trim() + '\n' + items.map(item => `• ${item.trim()}`).join('\n');
+          }
+        }
+        
         const lines = normalized.split('\n');
-        const isUnordered = lines.length > 0 && lines.every((l) => l.trim().startsWith('- '));
+        const isUnordered = lines.length > 1 && lines.some((l) => {
+          const trimmed = l.trim();
+          return trimmed.startsWith('- ') || trimmed.startsWith('• ') || trimmed.startsWith('* ');
+        }) && lines.filter((l) => {
+          const trimmed = l.trim();
+          return trimmed.startsWith('- ') || trimmed.startsWith('• ') || trimmed.startsWith('* ');
+        }).length > 1;
         const isOrdered = lines.length > 1 && lines.every((l) => /^\s*\d+\.\s+/.test(l));
         if (isUnordered) {
-          elements.push(
-            <ul key={`${keyPrefix}-ul-${bi}`} className="list-disc list-inside pl-3 ml-0 space-y-1 text-sm">
-              {lines.map((l, li) => (
-                <li key={`${keyPrefix}-li-${bi}-${li}`}>{renderBoldAndInlineCode(l.replace(/^\s*-\s*/, ''), `${keyPrefix}-li-${bi}-${li}`)}</li>
-              ))}
-            </ul>
-          );
+          // Separate non-list lines from list lines
+          const nonListLines: string[] = [];
+          const listLines: string[] = [];
+          
+          lines.forEach(line => {
+            const trimmed = line.trim();
+            if (trimmed.startsWith('- ') || trimmed.startsWith('• ') || trimmed.startsWith('* ')) {
+              listLines.push(line);
+            } else if (trimmed) {
+              nonListLines.push(line);
+            }
+          });
+          
+          // Render non-list content first if any
+          if (nonListLines.length > 0) {
+            elements.push(
+              <p key={`${keyPrefix}-p-${bi}`} className="leading-relaxed text-sm mb-2">
+                {renderBoldAndInlineCode(nonListLines.join(' '), `${keyPrefix}-p-${bi}`)}
+              </p>
+            );
+          }
+          
+          // Then render the list
+          if (listLines.length > 0) {
+            elements.push(
+              <ul key={`${keyPrefix}-ul-${bi}`} className="list-disc list-inside pl-3 ml-0 space-y-1 text-sm">
+                {listLines.map((l, li) => (
+                  <li key={`${keyPrefix}-li-${bi}-${li}`}>{renderBoldAndInlineCode(l.replace(/^\s*[-•*]\s*/, ''), `${keyPrefix}-li-${bi}-${li}`)}</li>
+                ))}
+              </ul>
+            );
+          }
         } else if (isOrdered) {
           elements.push(
             <ol key={`${keyPrefix}-ol-${bi}`} className="list-decimal list-inside pl-3 ml-0 space-y-1 text-sm">

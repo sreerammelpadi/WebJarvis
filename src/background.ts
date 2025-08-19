@@ -168,6 +168,7 @@ class BackgroundServiceWorker {
       const provider = settings?.defaultModel === 'local-wasm' ? 'local-wasm' : 'openai';
       const apiKey = settings?.openaiApiKey;
       const maxTokens = settings?.maxTokens || 1000;
+      const model = settings?.defaultModel || 'gpt-4o-mini';
       logger.info('Settings', { provider, apiKey: logger.mask(apiKey), maxTokens });
 
       if (!this.llm) this.llm = new LLMClient(provider, apiKey);
@@ -209,8 +210,8 @@ class BackgroundServiceWorker {
 
       const systemPrompt = 'You are WebCopilot, a precise and professional AI assistant for web pages. Always cite exact facts from the provided page context; if the specific detail is not in the context, say so briefly.';
 
-      logger.info('Generating response');
-      const result = await this.llm.generateResponse(systemPrompt, userPrompt, maxTokens);
+      logger.info('Generating response with model', model);
+      const result = await this.llm.generateResponse(systemPrompt, userPrompt, maxTokens, model === 'local-wasm' ? undefined : model);
       logger.info('Generation success', { tokens: result.tokens, model: result.model, cost: result.cost });
       sendResponse({ success: true, data: result });
     } catch (error) {

@@ -82,7 +82,7 @@ export interface UserSettings {
   huggingfaceApiKey?: string;
   supabaseUrl?: string;
   supabaseKey?: string;
-  defaultModel: 'gpt-4o-mini' | 'gpt-3.5-turbo' | 'local-wasm';
+  defaultModel: 'gpt-4o-mini' | 'gpt-3.5-turbo' | 'gpt-5-mini' | 'o4-mini' | 'local-wasm';
   embeddingModel: 'text-embedding-3-small' | 'local-wasm';
   maxTokens: number;
   costThreshold: number;

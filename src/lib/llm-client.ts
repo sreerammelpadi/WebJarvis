@@ -1,4 +1,5 @@
 import { LLMResponse, CostEstimate, ModelProvider } from '@/types';
+import { buildApiRequestBody, estimateModelCost, getModelConfig } from './model-config';
 
 /**
  * LLM client wrapper supporting multiple providers (OpenAI via fetch, local placeholder)
@@ -13,24 +14,23 @@ export class LLMClient {
     this.apiKey = apiKey;
   }
 
-  async generateResponse(systemPrompt: string, userPrompt: string, maxTokens: number = 1000): Promise<LLMResponse> {
-    if (this.provider === 'openai') return this.generateOpenAIResponse(systemPrompt, userPrompt, maxTokens);
+  async generateResponse(systemPrompt: string, userPrompt: string, maxTokens: number = 1000, model?: string): Promise<LLMResponse> {
+    if (this.provider === 'openai') return this.generateOpenAIResponse(systemPrompt, userPrompt, maxTokens, model);
     if (this.provider === 'local-wasm') return this.generateLocalResponse(systemPrompt, userPrompt, maxTokens);
     throw new Error(`Unsupported LLM provider: ${this.provider}`);
   }
 
-  private async generateOpenAIResponse(systemPrompt: string, userPrompt: string, maxTokens: number): Promise<LLMResponse> {
+  private async generateOpenAIResponse(systemPrompt: string, userPrompt: string, maxTokens: number, model?: string): Promise<LLMResponse> {
     if (!this.apiKey) throw new Error('OpenAI API key not set');
 
-    const body = {
-      model: 'gpt-4o-mini',
-      messages: [
-        { role: 'system', content: systemPrompt },
-        { role: 'user', content: userPrompt }
-      ],
-      max_tokens: maxTokens,
-      temperature: 0.7
-    };
+    const modelName = model || 'gpt-4o-mini';
+    const messages = [
+      { role: 'system', content: systemPrompt },
+      { role: 'user', content: userPrompt }
+    ];
+
+    // Use the model configuration system to build the correct API request
+    const body = buildApiRequestBody(modelName, messages, maxTokens);
 
     const res = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
@@ -54,7 +54,7 @@ export class LLMClient {
       content: choice?.message?.content || '',
       tokens: usage.total_tokens,
       model: json.model,
-      cost: this.estimateOpenAICost(usage.prompt_tokens, usage.completion_tokens),
+      cost: estimateModelCost(modelName, usage.prompt_tokens, usage.completion_tokens),
       finishReason: choice?.finish_reason || 'stop'
     };
   }
@@ -76,22 +76,19 @@ export class LLMClient {
     this.localModel = 'initialized';
   }
 
-  private estimateOpenAICost(inputTokens: number, outputTokens: number): number {
-    const inputCostPer1K = 0.00015;
-    const outputCostPer1K = 0.0006;
-    return (inputTokens / 1000) * inputCostPer1K + (outputTokens / 1000) * outputCostPer1K;
-  }
-
-  estimateCost(systemPrompt: string, userPrompt: string, maxTokens: number): CostEstimate {
+  estimateCost(systemPrompt: string, userPrompt: string, maxTokens: number, model?: string): CostEstimate {
     const inputTokens = Math.ceil((systemPrompt.length + userPrompt.length) / 4);
     const estimatedOutputTokens = Math.min(maxTokens, 1000);
     let estimatedCost = 0;
-    let model = this.provider;
+    let modelName: string = this.provider;
+    
     if (this.provider === 'openai') {
-      estimatedCost = this.estimateOpenAICost(inputTokens, estimatedOutputTokens);
-      model = 'openai';
+      const actualModel = model || 'gpt-4o-mini';
+      estimatedCost = estimateModelCost(actualModel, inputTokens, estimatedOutputTokens);
+      modelName = actualModel;
     }
-    return { inputTokens, outputTokens: estimatedOutputTokens, estimatedCost, model };
+    
+    return { inputTokens, outputTokens: estimatedOutputTokens, estimatedCost, model: modelName };
   }
 
   async setProvider(provider: ModelProvider, apiKey?: string): Promise<void> {
@@ -110,8 +107,8 @@ export class LLMClient {
     return false;
   }
 
-  async *streamResponse(systemPrompt: string, userPrompt: string, maxTokens: number): AsyncGenerator<string> {
-    const response = await this.generateResponse(systemPrompt, userPrompt, maxTokens);
+  async *streamResponse(systemPrompt: string, userPrompt: string, maxTokens: number, model?: string): AsyncGenerator<string> {
+    const response = await this.generateResponse(systemPrompt, userPrompt, maxTokens, model);
     yield response.content;
   }
 } 
