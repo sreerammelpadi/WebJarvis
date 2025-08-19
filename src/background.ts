@@ -208,7 +208,7 @@ class BackgroundServiceWorker {
       parts.push(`Question: ${userMessage}`);
       const userPrompt = parts.join('\n\n');
 
-      const systemPrompt = 'You are WebCopilot, a precise and professional AI assistant for web pages. Always cite exact facts from the provided page context; if the specific detail is not in the context, say so briefly.';
+      const systemPrompt = 'You are WebCopilot, a precise and professional AI assistant for web pages. Always cite exact facts from the provided page context; if the specific detail is not in the context, say so briefly and use your own knowledge to answer the question.';
 
       logger.info('Generating response with model', model);
       const result = await this.llm.generateResponse(systemPrompt, userPrompt, maxTokens, model === 'local-wasm' ? undefined : model);
