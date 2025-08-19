@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useMemo } from 'react';
 import ReactDOM from 'react-dom/client';
 import { LeftNav } from './components/LeftNav';
 import { useExtensionState } from './hooks/useExtensionState';
-import { useChat } from './hooks/useChat';
+import { useTabChat } from './hooks/useTabChat';
 import { MessageBubble } from './components/MessageBubble';
 import { ChatMessage, PageContent } from '@/types';
 import './styles/popup.css';
@@ -149,8 +149,18 @@ const InlineChatWindow: React.FC<{
 const Popup: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [showSidebar, setShowSidebar] = useState(false);
+  const [tabId, setTabId] = useState<number>(0);
+  const [sessionKey, setSessionKey] = useState<string>('');
   const { state, updateState } = useExtensionState();
-  const { sendMessage, messages, isProcessing, clearChat } = useChat();
+  
+  // Use tab-based chat once we have tab info
+  const { sendMessage, messages, isProcessing, clearChat, isLoading: chatLoading } = useTabChat(
+    tabId,
+    state.currentPage?.url || '',
+    state.currentPage?.title || '',
+    sessionKey,
+    state.currentPage
+  );
 
   const totalTokens = useMemo(() => {
     let sum = 0;
@@ -167,24 +177,55 @@ const Popup: React.FC = () => {
         const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
         const tabUrl = tab?.url || '';
         if (!tab || !tab.id || !tabUrl) { setIsLoading(false); return; }
-        const [nav] = await chrome.scripting.executeScript({ target: { tabId: tab.id }, func: () => { try { const anyPerf: any = performance as any; const navEntry = (performance.getEntriesByType('navigation') as any)[0]; const navStart = (anyPerf?.timeOrigin as number) || (anyPerf?.timing?.navigationStart as number) || (navEntry?.startTime as number) || Date.now(); return { navStart }; } catch { return { navStart: Date.now() }; } } });
+        
+        // Set tab ID immediately
+        setTabId(tab.id);
+        
+        const [nav] = await chrome.scripting.executeScript({ 
+          target: { tabId: tab.id }, 
+          func: () => { 
+            try { 
+              const anyPerf: any = performance as any; 
+              const navEntry = (performance.getEntriesByType('navigation') as any)[0]; 
+              const navStart = (anyPerf?.timeOrigin as number) || (anyPerf?.timing?.navigationStart as number) || (navEntry?.startTime as number) || Date.now(); 
+              return { navStart }; 
+            } catch { 
+              return { navStart: Date.now() }; 
+            } 
+          } 
+        });
+        
         const navStart = (nav?.result as any)?.navStart || Date.now();
         const urlObj = new URL(tabUrl);
-        const sessionKey = `${urlObj.origin}${urlObj.pathname}:${navStart}`;
-        const storage = await chrome.storage.local.get(['currentPage', 'chatHistory', 'lastSessionKey']);
+        const newSessionKey = `${urlObj.origin}${urlObj.pathname}:${navStart}`;
+        setSessionKey(newSessionKey);
+        
+        // Check if we need to extract page content
+        const storage = await chrome.storage.local.get(['currentPage']);
         const isNewPage = !storage.currentPage || storage.currentPage.url !== tabUrl;
-        const isNewSession = storage.lastSessionKey !== sessionKey;
-        if (isNewPage || isNewSession) { await clearChat(); updateState({ chatHistory: [] }); await chrome.storage.local.set({ lastSessionKey: sessionKey }); }
-        if (isNewPage || isNewSession || !storage.currentPage) {
-          let response = await chrome.runtime.sendMessage({ type: 'EXTRACT_PAGE_CONTENT', tabId: tab.id }).catch(async () => { await warmUpServiceWorker(); return chrome.runtime.sendMessage({ type: 'EXTRACT_PAGE_CONTENT', tabId: tab.id }); });
-          if (response?.success) { updateState({ currentPage: response.data }); await chrome.storage.local.set({ currentPage: response.data }); }
+        
+        if (isNewPage || !storage.currentPage) {
+          let response = await chrome.runtime.sendMessage({ type: 'EXTRACT_PAGE_CONTENT', tabId: tab.id }).catch(async () => { 
+            await warmUpServiceWorker(); 
+            return chrome.runtime.sendMessage({ type: 'EXTRACT_PAGE_CONTENT', tabId: tab.id }); 
+          });
+          if (response?.success) { 
+            updateState({ currentPage: response.data }); 
+            await chrome.storage.local.set({ currentPage: response.data }); 
+          }
+        } else {
+          updateState({ currentPage: storage.currentPage });
         }
-      } catch (error) { console.error('Failed to initialize popup:', error); } finally { setIsLoading(false); }
+      } catch (error) { 
+        console.error('Failed to initialize popup:', error); 
+      } finally { 
+        setIsLoading(false); 
+      }
     };
     init();
   }, []);
 
-  if (isLoading) {
+  if (isLoading || chatLoading) {
     return (
       <div className="w-[600px] h-[600px] bg-white dark:bg-gray-900 flex items-center justify-center">
         <div className="text-center space-y-4">

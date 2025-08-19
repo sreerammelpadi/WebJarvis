@@ -1,6 +1,7 @@
 import { ChromeMessage, ContextMenuInfo, ChatMessage } from '@/types';
 import { LLMClient } from '@/lib/llm-client';
 import { logger } from '@/lib/logger';
+import { TabChatManager } from '@/lib/tab-chat-manager';
 
 /**
  * Background service worker for WebCopilot extension
@@ -21,6 +22,7 @@ class BackgroundServiceWorker {
     this.setupContextMenus();
     this.setupMessageListeners();
     this.setupInstallationHandlers();
+    this.setupTabListeners();
 
     // Initialize LLM client using stored settings
     try {
@@ -32,6 +34,9 @@ class BackgroundServiceWorker {
     } catch (e) {
       logger.warn('LLM init skipped until settings available', e);
     }
+
+    // Initialize tab chat manager
+    TabChatManager.initialize();
 
     logger.info('Background ready');
     logger.groupEnd();
@@ -88,6 +93,33 @@ class BackgroundServiceWorker {
   }
 
   /**
+   * Setup tab event listeners for cleanup
+   */
+  private setupTabListeners(): void {
+    // Clean up when tabs are closed
+    chrome.tabs.onRemoved.addListener(async (tabId, removeInfo) => {
+      logger.info('Tab removed', { tabId, isWindowClosing: removeInfo.isWindowClosing });
+      await TabChatManager.removeTabContext(tabId);
+    });
+
+    // Clean up when windows are closed (additional cleanup)
+    chrome.windows.onRemoved.addListener(async (windowId) => {
+      logger.info('Window removed', { windowId });
+      // Validate all contexts to clean up any orphaned ones
+      await TabChatManager.validateAndCleanupTabs();
+    });
+
+    // Periodic cleanup when tabs are updated (URL changes)
+    chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
+      if (changeInfo.url) {
+        logger.info('Tab URL changed', { tabId, newUrl: changeInfo.url });
+        // Don't auto-cleanup on URL change as user might want to keep chat context
+        // But we could implement logic here to clear context if needed
+      }
+    });
+  }
+
+  /**
    * Handle incoming messages
    */
   private async handleMessage(
@@ -122,6 +154,18 @@ class BackgroundServiceWorker {
 
         case 'PROCESS_CHAT_MESSAGE':
           await this.handleProcessChatMessage(message, sender, sendResponse);
+          break;
+
+        case 'GET_TAB_CHAT_CONTEXT':
+          await this.handleGetTabChatContext(message, sender, sendResponse);
+          break;
+
+        case 'SAVE_TAB_CHAT_CONTEXT':
+          await this.handleSaveTabChatContext(message, sender, sendResponse);
+          break;
+
+        case 'UPDATE_TAB_CHAT_HISTORY':
+          await this.handleUpdateTabChatHistory(message, sender, sendResponse);
           break;
 
         default:
@@ -208,7 +252,7 @@ class BackgroundServiceWorker {
       parts.push(`Question: ${userMessage}`);
       const userPrompt = parts.join('\n\n');
 
-      const systemPrompt = 'You are WebCopilot, a precise and professional AI assistant for web pages. Always cite exact facts from the provided page context; if the specific detail is not in the context, say so briefly and use your own knowledge to answer the question.';
+      const systemPrompt = 'You are WebCopilot, a precise and friendly AI assistant for web pages. Always cite exact facts from the provided page context; if the specific detail is not in the context, say so briefly and then use your own knowledge to answer the question.';
 
       logger.info('Generating response with model', model);
       const result = await this.llm.generateResponse(systemPrompt, userPrompt, maxTokens, model === 'local-wasm' ? undefined : model);
@@ -411,6 +455,60 @@ class BackgroundServiceWorker {
     } catch (error) {
       logger.error('Import data error', error);
       sendResponse({ error: 'Failed to import data' });
+    }
+  }
+
+  /**
+   * Handle get tab chat context request
+   */
+  private async handleGetTabChatContext(
+    message: ChromeMessage,
+    sender: chrome.runtime.MessageSender,
+    sendResponse: (response?: any) => void
+  ): Promise<void> {
+    try {
+      const { tabId, url, sessionKey } = message.payload;
+      const context = await TabChatManager.getTabContext(tabId, url, sessionKey);
+      sendResponse({ success: true, data: context });
+    } catch (error) {
+      logger.error('Get tab chat context error', error);
+      sendResponse({ error: (error as Error).message });
+    }
+  }
+
+  /**
+   * Handle save tab chat context request
+   */
+  private async handleSaveTabChatContext(
+    message: ChromeMessage,
+    sender: chrome.runtime.MessageSender,
+    sendResponse: (response?: any) => void
+  ): Promise<void> {
+    try {
+      const { tabId, url, title, sessionKey, chatHistory, pageContent } = message.payload;
+      await TabChatManager.saveTabContext(tabId, url, title, sessionKey, chatHistory, pageContent);
+      sendResponse({ success: true });
+    } catch (error) {
+      logger.error('Save tab chat context error', error);
+      sendResponse({ error: (error as Error).message });
+    }
+  }
+
+  /**
+   * Handle update tab chat history request
+   */
+  private async handleUpdateTabChatHistory(
+    message: ChromeMessage,
+    sender: chrome.runtime.MessageSender,
+    sendResponse: (response?: any) => void
+  ): Promise<void> {
+    try {
+      const { tabId, sessionKey, chatHistory } = message.payload;
+      await TabChatManager.updateChatHistory(tabId, sessionKey, chatHistory);
+      sendResponse({ success: true });
+    } catch (error) {
+      logger.error('Update tab chat history error', error);
+      sendResponse({ error: (error as Error).message });
     }
   }
 
