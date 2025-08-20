@@ -124,6 +124,36 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
       };
 
       blocks.forEach((block, bi) => {
+        // Detect a heading on the first line of the block. If present,
+        // render the heading and then continue processing the remaining
+        // content within the same block so lists/paragraphs after the
+        // heading are preserved.
+        const lines = block.split('\n');
+        const firstLine = lines[0] ? lines[0].trim() : '';
+        const headingMatch = firstLine.match(/^(#{1,6})\s+(.*)$/);
+        let remaining = lines.slice(1).join('\n');
+
+        if (headingMatch) {
+          const level = headingMatch[1].length;
+          const text = headingMatch[2];
+          const Tag: any = `h${Math.min(level, 6)}`;
+          const headingClass = level <= 2 ? 'text-base font-semibold mb-2' : 'text-sm font-semibold mb-2';
+
+          elements.push(
+            <Tag key={`${keyPrefix}-heading-${bi}`} className={headingClass}>
+              {renderBoldAndInlineCode(text, `${keyPrefix}-heading-${bi}`)}
+            </Tag>
+          );
+
+          // If there's more content after the heading, treat it as a new
+          // pseudo-block to be processed by the rest of the pipeline.
+          if (remaining.trim()) {
+            // Replace block with the remaining content for further processing
+            block = remaining;
+          } else {
+            return; // nothing else in this block
+          }
+        }
         // Normalize inline ordered list lines like "1. item 2. item" into separate lines
         let normalized = block.replace(/\s+(?=\d+\.\s)/g, '\n');
         
@@ -138,21 +168,21 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
           }
         }
         
-        const lines = normalized.split('\n');
-        const isUnordered = lines.length > 1 && lines.some((l) => {
+        const normalizedLines = normalized.split('\n');
+        const isUnordered = normalizedLines.length > 1 && normalizedLines.some((l) => {
           const trimmed = l.trim();
           return trimmed.startsWith('- ') || trimmed.startsWith('• ') || trimmed.startsWith('* ');
-        }) && lines.filter((l) => {
+        }) && normalizedLines.filter((l) => {
           const trimmed = l.trim();
           return trimmed.startsWith('- ') || trimmed.startsWith('• ') || trimmed.startsWith('* ');
         }).length > 1;
-        const isOrdered = lines.length > 1 && lines.every((l) => /^\s*\d+\.\s+/.test(l));
+        const isOrdered = normalizedLines.length > 1 && normalizedLines.every((l) => /^\s*\d+\.\s+/.test(l));
         if (isUnordered) {
           // Separate non-list lines from list lines
           const nonListLines: string[] = [];
           const listLines: string[] = [];
           
-          lines.forEach(line => {
+          normalizedLines.forEach(line => {
             const trimmed = line.trim();
             if (trimmed.startsWith('- ') || trimmed.startsWith('• ') || trimmed.startsWith('* ')) {
               listLines.push(line);
@@ -183,7 +213,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
         } else if (isOrdered) {
           elements.push(
             <ol key={`${keyPrefix}-ol-${bi}`} className="list-decimal list-inside pl-3 ml-0 space-y-1 text-sm">
-              {lines.map((l, li) => (
+              {normalizedLines.map((l, li) => (
                 <li key={`${keyPrefix}-oli-${bi}-${li}`}>{renderBoldAndInlineCode(l.replace(/^\s*\d+\.\s*/, ''), `${keyPrefix}-oli-${bi}-${li}`)}</li>
               ))}
             </ol>

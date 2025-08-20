@@ -91,11 +91,9 @@ export const useTabChat = (
   }, [loadTabContext]);
 
   // Save context whenever messages change
-  useEffect(() => {
-    if (!isLoading && messages.length > 0) {
-      saveTabContext(messages);
-    }
-  }, [messages, isLoading, saveTabContext]);
+  // NOTE: persistence of chat history is handled by the background service
+  // after receiving the assistant response. Avoid saving on every local
+  // messages change to prevent duplicate writes from the frontend.
 
   const sendMessage = useCallback(async (content: string, context?: any) => {
     if (!content.trim() || isProcessing) return;
@@ -116,12 +114,11 @@ export const useTabChat = (
     logger.info('User message', { len: userMessage.content.length, tabId, sessionKey });
 
     try {
-      // Update chat history immediately
-      await updateChatHistory(newMessages);
-
-      const response = await chrome.runtime.sendMessage({ 
-        type: 'PROCESS_CHAT_MESSAGE', 
-        payload: { message: userMessage, context } 
+      // Send message to background for processing. Include tab/session info
+      // so the background can persist updates to the tab-based context.
+      const response = await chrome.runtime.sendMessage({
+        type: 'PROCESS_CHAT_MESSAGE',
+        payload: { message: userMessage, context, tabId, sessionKey, pageContent }
       });
       
       logger.info('Background response', response);
@@ -137,8 +134,9 @@ export const useTabChat = (
         
         const updated = [...newMessages, assistantMessage];
         setMessages(updated);
-        await updateChatHistory(updated);
-        logger.info('Saved assistant message');
+        // Background will persist this assistant message; frontend only
+        // updates local state here for immediate UI feedback.
+        logger.info('Received assistant message');
       } else {
         const errorText = response?.error || 'Unknown error';
         const errorMessage: ChatMessage = {
@@ -150,7 +148,6 @@ export const useTabChat = (
         
         const updated = [...newMessages, errorMessage];
         setMessages(updated);
-        await updateChatHistory(updated);
         logger.warn('Assistant error message shown', { error: errorText });
       }
     } catch (error) {

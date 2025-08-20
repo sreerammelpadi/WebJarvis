@@ -257,6 +257,48 @@ class BackgroundServiceWorker {
       logger.info('Generating response with model', model);
       const result = await this.llm.generateResponse(systemPrompt, userPrompt, maxTokens, model === 'local-wasm' ? undefined : model);
       logger.info('Generation success', { tokens: result.tokens, model: result.model, cost: result.cost });
+
+      // Persist assistant response into tab-based context immediately so
+      // replies are saved even if the popup closes. Also include the user
+      // message from the payload when creating/updating the context.
+      try {
+        const payload = (message as any).payload || {};
+        const tabId: number | undefined = payload.tabId || sender.tab?.id;
+        const sessionKey: string | undefined = payload.sessionKey;
+        const userMsgObj: ChatMessage | undefined = payload.message;
+
+        if (tabId && sessionKey) {
+          const assistantMessage: ChatMessage = {
+            id: `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+            role: 'assistant',
+            content: result.content,
+            timestamp: Date.now(),
+            metadata: { tokens: result.tokens, model: result.model, cost: result.cost }
+          };
+
+          const existingContext = await TabChatManager.getTabContext(tabId, currentPage?.url || '', sessionKey);
+          let updatedHistory: ChatMessage[] = existingContext?.chatHistory ? [...existingContext.chatHistory] : [];
+
+          // Append the user message (if provided) then assistant message
+          if (userMsgObj && (!updatedHistory.length || updatedHistory[updatedHistory.length - 1].id !== userMsgObj.id)) {
+            updatedHistory.push(userMsgObj);
+          }
+          updatedHistory.push(assistantMessage);
+
+          if (existingContext) {
+            await TabChatManager.updateChatHistory(tabId, sessionKey, updatedHistory);
+            logger.info('Updated tab chat history with assistant response', { tabId, sessionKey, messagesCount: updatedHistory.length });
+          } else {
+            const title = currentPage?.title || '';
+            const url = currentPage?.url || '';
+            await TabChatManager.saveTabContext(tabId, url, title, sessionKey, updatedHistory, currentPage);
+            logger.info('Created tab chat context with assistant response', { tabId, sessionKey, messagesCount: updatedHistory.length });
+          }
+        }
+      } catch (e) {
+        logger.warn('Failed to persist assistant response to tab context', e);
+      }
+
       sendResponse({ success: true, data: result });
     } catch (error) {
       logger.error('Generation failed', error);
