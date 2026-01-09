@@ -5,11 +5,10 @@
 ![WebCopilot](https://img.shields.io/badge/Chrome-Extension-blue?style=for-the-badge&logo=google-chrome)
 ![React](https://img.shields.io/badge/React-18-61DAFB?style=for-the-badge&logo=react)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.2-3178C6?style=for-the-badge&logo=typescript)
-![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)
 
 **A production-ready Chrome extension that transforms web browsing with AI-powered page analysis, intelligent chat, and specialized job application features.**
 
-[Features](#-features) • [Installation](#-installation) • [Architecture](#-architecture) • [Usage](#-usage) • [Contributing](#-contributing)
+[Features](#-features) • [Installation](#-installation) • [Architecture](#-architecture) • [Usage](#-usage)
 
 </div>
 
@@ -121,57 +120,11 @@ Export AI responses in multiple formats:
 
 ### System Design
 
-WebCopilot follows a modular, service-oriented architecture optimized for Chrome Extension Manifest V3:
-
-```
-┌─────────────────────────────────────────────────────────────┐
-│                        User Interface                        │
-│  ┌─────────────┐  ┌──────────────┐  ┌──────────────────┐   │
-│  │   Popup     │  │   Options    │  │  Content Script  │   │
-│  │  (React)    │  │    Page      │  │  (Injection)     │   │
-│  └──────┬──────┘  └──────┬───────┘  └────────┬─────────┘   │
-│         │                │                    │              │
-└─────────┼────────────────┼────────────────────┼──────────────┘
-          │                │                    │
-          └────────────────┴────────────────────┘
-                           │
-          ┌────────────────▼─────────────────────┐
-          │    Background Service Worker         │
-          │  ┌──────────────────────────────┐   │
-          │  │   Message Router & Handler   │   │
-          │  └──────────────┬───────────────┘   │
-          │                 │                    │
-          │  ┌──────────────▼───────────────┐   │
-          │  │     Core Libraries           │   │
-          │  │  • RAG System                │   │
-          │  │  • LLM Client                │   │
-          │  │  • Page Extractor            │   │
-          │  │  • Embeddings Manager        │   │
-          │  │  • Template Manager          │   │
-          │  │  • Tab Chat Manager          │   │
-          │  └──────────────┬───────────────┘   │
-          └─────────────────┼───────────────────┘
-                            │
-          ┌─────────────────▼─────────────────┐
-          │         Storage Layer             │
-          │  ┌────────────┐  ┌─────────────┐ │
-          │  │ IndexedDB  │  │   Chrome    │ │
-          │  │ (Vectors,  │  │  Storage    │ │
-          │  │  Chunks)   │  │ (Settings)  │ │
-          │  └────────────┘  └─────────────┘ │
-          └───────────────────────────────────┘
-                            │
-          ┌─────────────────▼─────────────────┐
-          │       External Services           │
-          │  • OpenAI API                     │
-          │  • Hugging Face API               │
-          │  • Supabase (Optional)            │
-          └───────────────────────────────────┘
-```
+WebCopilot follows a modular, service-oriented architecture optimized for Chrome Extension Manifest V3.
 
 ### Core Components
 
-#### 1. Background Service Worker (`background.ts`)
+#### 1. Background Service Worker
 The central message router and orchestrator:
 - **Message Handling**: Routes messages between popup, content scripts, and core libraries
 - **State Management**: Maintains extension-wide state and tab-specific contexts
@@ -179,33 +132,8 @@ The central message router and orchestrator:
 - **Context Menu**: Handles right-click integration
 - **API Orchestration**: Coordinates between multiple services
 
-**Key Responsibilities**:
-```typescript
-- handleProcessChatMessage(): Processes AI chat requests
-- handlePageExtraction(): Extracts and stores page content
-- handleGetTabChatContext(): Retrieves tab-specific chat history
-- handleExportData() / handleImportData(): Data management
-```
-
-#### 2. RAG System (`lib/rag.ts`)
+#### 2. RAG System
 Implements Retrieval-Augmented Generation for context-aware responses:
-
-**Architecture**:
-```typescript
-class RAGSystem {
-  // 1. Content Processing
-  async processPageContent(pageContent: PageContent): Promise<void>
-  // Chunks content into embeddings, stores in IndexedDB
-  
-  // 2. Semantic Search
-  async findRelevantChunks(query: string, topK: number): Promise<Chunk[]>
-  // Vector similarity search for relevant context
-  
-  // 3. Context Building
-  async generateResponse(query: string, context: string): Promise<string>
-  // Combines retrieved chunks with user query for AI
-}
-```
 
 **Process Flow**:
 1. **Ingestion**: Page content → Text chunks (500-1000 chars)
@@ -219,22 +147,13 @@ class RAGSystem {
 - Reduces API costs by sending only relevant content
 - Improves response accuracy with targeted context
 
-#### 3. Page Extractor (`lib/page-extractor.ts`)
+#### 3. Page Extractor
 Intelligent content extraction with multiple strategies:
 
 **Extraction Pipeline**:
-```typescript
-class PageExtractor {
-  // Strategy 1: JSON-LD Structured Data
-  extractJSONLD(document: Document): JobPosting | Article | Product
-  
-  // Strategy 2: Mozilla Readability
-  extractWithReadability(document: Document): CleanContent
-  
-  // Strategy 3: Full DOM Scrape
-  extractFullPage(document: Document): RawContent
-}
-```
+- **Strategy 1**: JSON-LD Structured Data
+- **Strategy 2**: Mozilla Readability
+- **Strategy 3**: Full DOM Scrape
 
 **Special Handling**:
 - **Job Postings**: Extracts requirements, qualifications, compensation, visa info
@@ -242,135 +161,25 @@ class PageExtractor {
 - **Products**: Name, price, description, reviews
 - **Generic Pages**: Cleaned text with metadata
 
-#### 4. LLM Client (`lib/llm-client.ts`)
+#### 4. LLM Client
 Unified interface for multiple AI providers:
-
-```typescript
-class LLMClient {
-  // Provider-agnostic chat interface
-  async chat(messages: Message[], options?: ChatOptions): Promise<string>
-  
-  // Streaming support
-  async streamChat(messages: Message[], onChunk: (text: string) => void): Promise<void>
-  
-  // Token estimation for cost control
-  estimateTokens(text: string): number
-}
-```
 
 **Supported Providers**:
 - **OpenAI**: GPT-4, GPT-3.5-turbo with streaming
 - **Hugging Face**: Open-source models via Inference API
 - **Local Models**: WASM-based models for privacy
 
-#### 5. Template Manager (`lib/template-manager.ts`)
-Manages custom prompt templates:
+#### 5. Template Manager
+Manages custom prompt templates with full CRUD operations, import/export functionality, and persistent storage.
 
-```typescript
-interface PromptTemplate {
-  id: string;
-  title: string;
-  prompt: string;
-  description?: string;
-  isDefault: boolean;
-  createdAt: number;
-  updatedAt: number;
-}
+#### 6. Embeddings Manager
+Handles vector embeddings for semantic search with cosine similarity calculations and batch processing.
 
-class TemplateManager {
-  static async getTemplates(): Promise<PromptTemplate[]>
-  static async addTemplate(title, prompt, description?): Promise<PromptTemplate>
-  static async updateTemplate(id, updates): Promise<void>
-  static async deleteTemplate(id): Promise<void>
-  static async resetToDefaults(): Promise<void>
-}
-```
+#### 7. Storage Manager
+IndexedDB wrapper for page content, chat history, embeddings, and vector search.
 
-#### 6. Embeddings Manager (`lib/embeddings.ts`)
-Handles vector embeddings for semantic search:
-
-```typescript
-class EmbeddingsManager {
-  // Generate embeddings from text
-  async generateEmbedding(text: string): Promise<number[]>
-  
-  // Cosine similarity for search
-  cosineSimilarity(vecA: number[], vecB: number[]): number
-  
-  // Batch processing for efficiency
-  async batchGenerateEmbeddings(texts: string[]): Promise<number[][]>
-}
-```
-
-#### 7. Storage Manager (`lib/storage.ts`)
-IndexedDB wrapper for complex data:
-
-```typescript
-class StorageManager {
-  // Page content and chunks
-  async savePageContent(tabId: number, content: PageContent): Promise<void>
-  async getPageContent(tabId: number): Promise<PageContent | null>
-  
-  // Chat history
-  async saveChatHistory(tabId: number, messages: ChatMessage[]): Promise<void>
-  async getChatHistory(tabId: number): Promise<ChatMessage[]>
-  
-  // Embeddings and vectors
-  async saveEmbeddings(chunks: EmbeddedChunk[]): Promise<void>
-  async searchSimilar(queryVector: number[], topK: number): Promise<Chunk[]>
-}
-```
-
-#### 8. Tab Chat Manager (`lib/tab-chat-manager.ts`)
-Manages per-tab conversation state:
-
-```typescript
-class TabChatManager {
-  // Tab-specific context
-  async getContext(tabId: number): Promise<TabChatContext>
-  async saveContext(tabId: number, context: TabChatContext): Promise<void>
-  
-  // Message history
-  async addMessage(tabId: number, message: ChatMessage): Promise<void>
-  async clearHistory(tabId: number): Promise<void>
-  
-  // Cleanup on tab close
-  async cleanup(tabId: number): Promise<void>
-}
-```
-
-### Data Flow
-
-#### Example: Processing a Chat Message
-
-```
-1. User types message in Popup
-   └─> popup.tsx: handleSendMessage()
-
-2. Send to Background Worker
-   └─> chrome.runtime.sendMessage({ type: 'PROCESS_CHAT', ... })
-
-3. Background Worker Routes Message
-   └─> background.ts: handleProcessChatMessage()
-
-4. Load Tab Context & Page Content
-   └─> TabChatManager.getContext(tabId)
-   └─> StorageManager.getPageContent(tabId)
-
-5. RAG Retrieval
-   └─> RAGSystem.findRelevantChunks(query)
-   └─> EmbeddingsManager.searchSimilar(queryVector)
-
-6. Build Context & Call LLM
-   └─> LLMClient.chat([...history, relevantChunks, userMessage])
-
-7. Store Response & Return
-   └─> TabChatManager.addMessage(tabId, response)
-   └─> sendResponse({ success: true, response })
-
-8. Update UI
-   └─> popup.tsx: Add message to state, display to user
-```
+#### 8. Tab Chat Manager
+Manages per-tab conversation state with message history and automatic cleanup.
 
 ---
 
@@ -428,40 +237,13 @@ class TabChatManager {
 
 ### Local Development Setup
 
-1. **Clone the Repository**
-   ```bash
-   git clone https://github.com/yourusername/webcopilot.git
-   cd webcopilot
-   ```
+Clone the repository, install dependencies, build the extension, and load it in Chrome:
 
-2. **Install Dependencies**
-   ```bash
-   npm install
-   ```
-
-3. **Build the Extension**
-   
-   For development with auto-rebuild:
-   ```bash
-   npm run dev
-   ```
-   
-   For production build:
-   ```bash
-   npm run build
-   ```
-
-4. **Load Extension in Chrome**
-   - Open Chrome and navigate to `chrome://extensions/`
-   - Enable **Developer mode** (toggle in top-right)
-   - Click **Load unpacked**
-   - Select the `dist` folder from the project directory
-
-5. **Configure API Keys**
-   - Click the WebCopilot extension icon
-   - Go to Options/Settings
-   - Add your OpenAI API key
-   - (Optional) Configure Supabase for cloud sync
+1. Clone and install
+2. Run `npm install`
+3. Build with `npm run dev` (development) or `npm run build` (production)
+4. Load unpacked extension in Chrome from the `dist` folder
+5. Configure API keys in extension settings
 
 ---
 
@@ -469,76 +251,31 @@ class TabChatManager {
 
 ### Basic Workflow
 
-1. **Navigate to Any Webpage**
-   - Open any website you want to analyze
-
-2. **Open WebCopilot**
-   - Click the extension icon in Chrome toolbar
-   - Extension automatically extracts page content
-
-3. **Ask Questions**
-   - Type your question in the chat input
-   - AI responds with context from the current page
-   - Chat history persists per tab
-
-4. **Use Templates (Quick Actions)**
-   - Click sidebar toggle (☰) to show templates
-   - Click any template to execute it
-   - Create custom templates in Settings
+1. **Navigate to Any Webpage** - Open any website you want to analyze
+2. **Open WebCopilot** - Click the extension icon in Chrome toolbar
+3. **Ask Questions** - AI responds with context from the current page
+4. **Use Templates** - Click sidebar to access custom prompt templates
 
 ### Job Seeker Workflow
 
-**Analyzing a Job Posting:**
-1. Open a job posting page
-2. Click WebCopilot icon
-3. Ask: "What are the key requirements?"
-4. AI extracts and summarizes essential qualifications
+**Analyzing Job Postings:**
+- Open job posting → Click WebCopilot → Ask about requirements
 
-**Generating a Cover Letter:**
-1. While on job posting page
-2. Use template: "Generate Cover Letter"
-3. AI creates tailored 350-word cover letter
-4. Export as PDF or DOCX
+**Generating Cover Letters:**
+- Use "Generate Cover Letter" template → Export as PDF/DOCX
 
 **Interview Preparation:**
-1. Ask about company culture, tech stack, or role details
-2. Get AI-powered insights from job description
-3. Prepare targeted questions
+- Ask about company culture, tech stack, or role details
 
 ### Creating Custom Templates
 
-1. **Open Settings**
-   - Click extension icon → Options
-
-2. **Navigate to Templates Tab**
-
-3. **Create New Template**
-   - **Title**: "Competitor Analysis"
-   - **Description**: "Analyze competitor features"
-   - **Prompt**: "Analyze this page and identify: 1) Key products/services, 2) Pricing strategy, 3) Unique value propositions, 4) Target audience"
-   - Click **Add Template**
-
-4. **Use Your Template**
-   - Open any competitor website
-   - Click sidebar → Select "Competitor Analysis"
-   - Get instant structured analysis
+Navigate to Settings → Templates Tab → Add new template with title, description, and prompt. Templates appear in sidebar for one-click execution.
 
 ### Advanced Features
 
-**Context Menu Integration:**
-- Select any text on a webpage
-- Right-click → "Send to WebCopilot"
-- Get instant analysis without opening popup
-
-**Export Responses:**
-- Click export icon on any AI response
-- Choose format: PDF, DOCX, Markdown, or Text
-- File downloads automatically
-
-**Data Management:**
-- Settings → Data → Export/Import
-- Backup all templates, settings, and chat history
-- Share templates with team members
+- **Context Menu**: Right-click selected text → Send to WebCopilot
+- **Export Responses**: Download as PDF, DOCX, Markdown, or Text
+- **Data Management**: Backup and restore templates and chat history
 
 ---
 
@@ -548,428 +285,65 @@ class TabChatManager {
 
 Access via extension popup → Options (⚙️ icon)
 
-#### General Settings
-- **Theme**: Auto, Light, or Dark mode
-- **Language**: Interface language (future feature)
-- **Default Model**: Choose AI model (GPT-4, GPT-3.5-turbo, etc.)
-- **Token Limit**: Maximum tokens per request
-- **Cost Threshold**: Warning before expensive API calls
-
-#### AI Configuration
-- **OpenAI API Key**: Your API key from OpenAI Platform
-- **Model Selection**: 
-  - GPT-4: Most capable, higher cost
-  - GPT-3.5-turbo: Fast, cost-effective
-  - Custom models: Add your own endpoints
-- **Temperature**: 0.0 (Focused) to 1.0 (Creative)
-- **Max Tokens**: Response length limit
-
-#### Storage Settings
-- **Supabase URL**: (Optional) For cloud sync
-- **Supabase API Key**: (Optional) Service key
-- **Sync Enabled**: Toggle cloud synchronization
-- **Local Storage**: View usage statistics
-
-#### Template Management
-- **Create Templates**: Add custom prompts
-- **Edit Templates**: Modify existing templates
-- **Import/Export**: Share template collections
-- **Reset to Defaults**: Restore original templates
-
-#### Advanced Settings
-- **Debug Mode**: Enable detailed logging
-- **Performance**: Toggle caching, embeddings
-- **Privacy**: Control data collection
-- **Export Data**: Download all extension data
+- **General Settings**: Theme, language, model selection, token limits
+- **AI Configuration**: OpenAI API key, model selection, temperature
+- **Storage Settings**: Optional Supabase cloud sync
+- **Template Management**: Create, edit, import/export templates
+- **Advanced Settings**: Debug mode, performance, privacy controls
 
 ### API Key Setup
 
-**OpenAI:**
-1. Visit [OpenAI Platform](https://platform.openai.com/api-keys)
-2. Create new API key
-3. Copy and paste into extension settings
-4. Set usage limits in OpenAI dashboard (recommended)
+**OpenAI**: Get API key from [OpenAI Platform](https://platform.openai.com/api-keys) and add to extension settings.
 
-**Supabase (Optional):**
-1. Create project at [Supabase](https://supabase.com)
-2. Get project URL and anon key
-3. Add to extension settings
-4. Enable storage and sync features
-
----
-
-## 🧪 Testing
-
-### Run Tests
-
-**Unit Tests:**
-```bash
-npm test
-```
-
-**Watch Mode:**
-```bash
-npm run test:watch
-```
-
-**End-to-End Tests:**
-```bash
-npm run test:e2e
-```
-
-**Type Checking:**
-```bash
-npm run type-check
-```
-
-**Linting:**
-```bash
-npm run lint
-npm run lint:fix  # Auto-fix issues
-```
-
-**Code Formatting:**
-```bash
-npm run format
-```
-
-### Coverage
-
-Run tests with coverage:
-```bash
-npm test -- --coverage
-```
-
----
-
-## 🚀 Production Build & Deployment
-
-### Build for Production
-
-1. **Clean Previous Builds**
-   ```bash
-   npm run clean
-   ```
-
-2. **Production Build**
-   ```bash
-   npm run build
-   ```
-
-3. **Verify Output**
-   - Check `dist` folder for all assets
-   - Ensure `manifest.json` is at root of `dist`
-   - Test extension by loading unpacked version
-
-### Publishing to Chrome Web Store
-
-1. **Create ZIP Archive**
-   ```bash
-   cd dist
-   zip -r ../webcopilot-v1.0.0.zip .
-   ```
-
-2. **Chrome Web Store Console**
-   - Visit [Chrome Developer Dashboard](https://chrome.google.com/webstore/devconsole)
-   - Create new item or update existing
-   - Upload ZIP file
-
-3. **Store Listing Details**
-   - **Name**: WebCopilot - AI Web Assistant
-   - **Description**: Use the detailed description from this README
-   - **Screenshots**: Add 1280x800 screenshots showing:
-     - Main chat interface
-     - Template selection
-     - Job analysis feature
-     - Cover letter generation
-     - Settings page
-   - **Category**: Productivity
-   - **Privacy**: Explain data handling (local-first, optional cloud)
-
-4. **Submit for Review**
-   - Review typically takes 1-3 business days
-   - Address any feedback from Chrome team
-   - Publish once approved
-
-### Version Management
-
-Update version in:
-- `package.json`
-- `manifest.json`
-
-Follow semantic versioning:
-- MAJOR: Breaking changes
-- MINOR: New features, backwards compatible
-- PATCH: Bug fixes
+**Supabase** (Optional): Create project at [Supabase](https://supabase.com) for cloud sync.
 
 ---
 
 ## 🤝 Contributing
 
-We welcome contributions! Here's how to get involved:
+Contributions welcome! Fork the repository, create a feature branch, make changes, and submit a pull request.
 
 ### Development Setup
-
-1. **Fork the Repository**
-   - Click "Fork" on GitHub
-   - Clone your fork locally
-
-2. **Create Feature Branch**
-   ```bash
-   git checkout -b feature/your-feature-name
-   ```
-
-3. **Make Changes**
-   - Follow TypeScript best practices
-   - Add tests for new features
-   - Update documentation
-
-4. **Test Thoroughly**
-   ```bash
-   npm test
-   npm run lint
-   npm run type-check
-   ```
-
-5. **Commit Changes**
-   ```bash
-   git commit -m "feat: add new feature"
-   ```
-   
-   Follow [Conventional Commits](https://www.conventionalcommits.org/)
-
-6. **Push and Create PR**
-   ```bash
-   git push origin feature/your-feature-name
-   ```
-
-### Code Standards
-
-- **TypeScript**: Use strict mode, avoid `any`
-- **React**: Functional components with hooks
-- **Naming**: 
-  - Components: PascalCase
-  - Functions: camelCase
-  - Constants: UPPER_SNAKE_CASE
-- **Comments**: JSDoc for public APIs
-- **Testing**: Aim for 80%+ coverage
+1. Fork and clone the repository
+2. Create feature branch
+3. Follow TypeScript best practices
+4. Add tests and update documentation
+5. Follow Conventional Commits format
 
 ### Areas for Contribution
-
-- 🌐 Multi-language support
-- 🎤 Voice input/output
-- 📊 Analytics dashboard
-- 🔌 Additional LLM providers
-- 🎨 UI/UX improvements
-- 📚 Documentation and examples
-- 🐛 Bug fixes
-
----
-
-## 📄 License
-
-This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
+- Multi-language support
+- Voice input/output
+- Analytics dashboard
+- Additional LLM providers
+- UI/UX improvements
+- Documentation and examples
+- Bug fixes
 
 ---
 
 ## 🆘 Support & Resources
 
-### Documentation
-- [User Guide](docs/user-guide.md)
-- [Developer Guide](docs/developer-guide.md)
-- [API Reference](docs/api-reference.md)
-- [Architecture Deep Dive](docs/architecture.md)
-
 ### Community
-- **Issues**: [GitHub Issues](https://github.com/yourusername/webcopilot/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/yourusername/webcopilot/discussions)
-- **Wiki**: [Project Wiki](https://github.com/yourusername/webcopilot/wiki)
+- **Issues**: [GitHub Issues](https://github.com/sreerammelpadi/WebJarvis/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/sreerammelpadi/WebJarvis/discussions)
 
 ### Troubleshooting
 
 **Extension Not Loading?**
 - Check Chrome version (requires 88+)
-- Verify `manifest.json` syntax
+- Verify manifest.json syntax
 - Check browser console for errors
 
 **API Calls Failing?**
 - Verify API key is correct
-- Check API key has proper permissions
+- Check API key permissions
 - Ensure sufficient API credits
-- Check network connectivity
 
 **Content Not Extracting?**
 - Page may block content scripts
 - Try refreshing the page
 - Use manual retry option
-- Check for anti-bot protection
-
-**Chat History Not Persisting?**
-- Check IndexedDB is enabled
-- Verify storage permissions
-- Clear extension data and restart
 
 ---
 
-## 🗺️ Roadmap
-
-### Q1 2026
-- [ ] Multi-language UI support
-- [ ] Firefox extension port
-- [ ] Enhanced template variables
-- [ ] Batch job analysis
-
-### Q2 2026
-- [ ] Voice input/output
-- [ ] Advanced analytics dashboard
-- [ ] Team collaboration features
-- [ ] Template marketplace
-
-### Q3 2026
-- [ ] Mobile companion app
-- [ ] Desktop application (Electron)
-- [ ] Enterprise features
-- [ ] Self-hosted AI models
-
-### Long-term Vision
-- [ ] Cross-browser support (Safari, Edge)
-- [ ] Fine-tuned domain-specific models
-- [ ] Plugin ecosystem
-- [ ] Advanced automation workflows
-
----
-
-## 🙏 Acknowledgments
-
-Built with amazing open-source tools:
-
-- [OpenAI](https://openai.com) - AI models and embeddings
-- [React](https://react.dev) - UI framework
-- [TailwindCSS](https://tailwindcss.com) - Styling framework
-- [Mozilla Readability](https://github.com/mozilla/readability) - Content extraction
-- [Chrome Extensions](https://developer.chrome.com/docs/extensions/) - Platform documentation
-- [Supabase](https://supabase.com) - Backend infrastructure
-- All our contributors and community members ❤️
-
----
-
-## 📊 Project Stats
-
-- **Lines of Code**: ~10,000+
-- **Test Coverage**: 85%+
-- **Bundle Size**: ~1.2MB (minified)
-- **Supported Browsers**: Chrome 88+
-- **Active Installations**: Growing daily!
-
----
-
-<div align="center">
-
-**Made with ❤️ by the WebCopilot Team**
-
-⭐ Star us on GitHub if you find this helpful!
-
-[Report Bug](https://github.com/yourusername/webcopilot/issues) • [Request Feature](https://github.com/yourusername/webcopilot/issues) • [Documentation](docs/)
-
-</div>
-<-- Test commit 0 --> 
-
-<-- Test commit 1 --> 
-
-<-- Test commit 2 --> 
-
-<-- Test commit 3 --> 
-
-<-- Test commit 4 --> 
-
-<-- Test commit 5 --> 
-
-<-- Test commit 6 --> 
-
-<-- Test commit 7 --> 
-
-<-- Test commit 8 --> 
-
-<-- Test commit 9 --> 
-
-<-- Test commit 10 --> 
-
-<-- Test commit 11 --> 
-
-<-- Test commit 12 --> 
-
-<-- Test commit 13 --> 
-
-<-- Test commit 14 --> 
-
-<-- Test commit 15 --> 
-
-<-- Test commit 16 --> 
-
-<-- Test commit 17 --> 
-
-<-- Test commit 18 --> 
-
-<-- Test commit 19 --> 
-
-<-- Test commit 20 --> 
-
-<-- Test commit 21 --> 
-
-<-- Test commit 22 --> 
-
-<-- Test commit 23 --> 
-
-<-- Test commit 24 --> 
-
-<-- Test commit 25 --> 
-
-<-- Test commit 26 --> 
-
-<-- Test commit 27 --> 
-
-<-- Test commit 28 --> 
-
-<-- Test commit 29 --> 
-
-<-- Test commit 30 --> 
-
-<-- Test commit 31 --> 
-
-<-- Test commit 32 --> 
-
-<-- Test commit 33 --> 
-
-<-- Test commit 34 --> 
-
-<-- Test commit 35 --> 
-
-<-- Test commit 36 --> 
-
-<-- Test commit 37 --> 
-
-<-- Test commit 38 --> 
-
-<-- Test commit 39 --> 
-
-<-- Test commit 40 --> 
-
-<-- Test commit 41 --> 
-
-<-- Test commit 42 --> 
-
-<-- Test commit 43 --> 
-
-<-- Test commit 44 --> 
-
-<-- Test commit 45 --> 
-
-<-- Test commit 46 --> 
-
-<-- Test commit 47 --> 
-
-<-- Test commit 48 --> 
-
-<-- Test commit 49 --> 
-
-<-- Test commit 50 --> 
+**WebCopilot** - Making the web more intelligent, one page at a time. 🚀
